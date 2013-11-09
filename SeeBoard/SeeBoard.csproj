@@ -47,6 +47,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -105,6 +106,10 @@
     <ProjectReference Include="..\Engine\Engine.csproj">
       <Project>{F701E3E0-0A40-4357-BCFD-7829738AD749}</Project>
       <Name>Engine</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnmanagedDLLs\UnmanagedDLLs.csproj">
+      <Project>{EAE03A7D-BC48-40FD-9B56-CE5389D0D074}</Project>
+      <Name>UnmanagedDLLs</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

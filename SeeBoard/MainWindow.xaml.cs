@@ -11,6 +11,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Runtime.InteropServices;
 
 namespace SeeBoard
 {
@@ -22,6 +23,39 @@ namespace SeeBoard
         public MainWindow()
         {
             InitializeComponent();
+        }
+
+        private void ButtonGo_Click(object sender, RoutedEventArgs e)
+        {
+            Engine.Engine engine = new Engine.Engine(); 
+            engine.BoardImagePath = System.IO.Path.GetFullPath(".\\..\\..\\..\\Images\\EmptyBoards\\Board1.jpg");
+            engine.Process();
+
+            OrigImage.Source = BitmapSourceConvert.ToBitmapSource(engine.BoardImage);
+            GrayImage.Source = BitmapSourceConvert.ToBitmapSource(engine.GrayImage);
+        }
+
+        public static class BitmapSourceConvert
+        {
+            [DllImport("gdi32")]
+            private static extern int DeleteObject(IntPtr o);
+
+            public static BitmapSource ToBitmapSource(Emgu.CV.IImage image)
+            {
+                using (System.Drawing.Bitmap source = image.Bitmap)
+                {
+                    IntPtr ptr = source.GetHbitmap();
+
+                    BitmapSource bs = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
+                        ptr,
+                        IntPtr.Zero,
+                        Int32Rect.Empty,
+                        System.Windows.Media.Imaging.BitmapSizeOptions.FromEmptyOptions());
+
+                    DeleteObject(ptr);
+                    return bs;
+                }
+            }
         }
     }
 }
