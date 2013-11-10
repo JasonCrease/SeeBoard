@@ -74,17 +74,16 @@ namespace Engine
             Lines = CannyImage.HoughLinesBinary(
                 1, //Distance resolution in pixel-related units
                 Math.PI / 360.0, //Angle resolution measured in radians.
-                40, //threshold
-                40, //min Line width
+                80, //threshold
+                20, //min Line width
                 20 //gap between lines
                 )[0]; //Get the lines from the first channel
 
             // Find board
             m_Board = new Board();
-            m_Board.FindCorners(Lines);
+            m_Board.FindGrid(Lines);
 
             // Make lines image
-
             Image<Bgr, Byte> linesImage = BoardImage.CopyBlank();
             foreach (LineSegment2D line in Lines)
                 linesImage.Draw(line, new Bgr(System.Drawing.Color.Gray), 1);
@@ -94,12 +93,46 @@ namespace Engine
                 linesImage.Draw(line, new Bgr(System.Drawing.Color.Green), 1);
             LinesImage = linesImage;
 
+            // Remove perspective from image
+            RemovePerspective(m_Board.GetBoardRegression());
 
-            // Warp image
+            // Convert the image to grayscale and filter out the noise
+            GrayImage = WarpedImage.Convert<Gray, Byte>().PyrDown().PyrUp();
 
-            double x1 = m_Board.OlsRegression.A * 300 / m_Board.OlsRegression.B;
-            double x2 = m_Board.OlsRegression.A + ((400 - m_Board.OlsRegression.A) * 300 / m_Board.OlsRegression.B);
-            double x3 = m_Board.OlsRegression.A - ()
+            // Do canny filter
+            CannyImage = GrayImage.Canny(120.0, 80.0);
+
+            // Do Edge finder
+            Lines = CannyImage.HoughLinesBinary(
+                1, //Distance resolution in pixel-related units
+                Math.PI / 360.0, //Angle resolution measured in radians.
+                20, //threshold
+                20, //min Line width
+                20 //gap between lines
+                )[0]; //Get the lines from the first channel
+
+            // Find board
+            m_Board = new Board();
+            m_Board.FindGrid(Lines);
+
+            // Make lines image
+
+            linesImage = BoardImage.CopyBlank();
+            foreach (LineSegment2D line in Lines)
+                linesImage.Draw(line, new Bgr(System.Drawing.Color.Gray), 1);
+            foreach (LineSegment2D line in m_Board.HorizLines)
+                linesImage.Draw(line, new Bgr(System.Drawing.Color.Red), 1);
+            foreach (LineSegment2D line in m_Board.VertLines)
+                linesImage.Draw(line, new Bgr(System.Drawing.Color.Green), 1);
+            LinesImage = linesImage;
+        }
+
+        private void RemovePerspective(OLSRegression regression)
+        {
+            double B = regression.B;
+            double A = regression.A;
+            double x1 = A * (300 / (B + 300));
+            double x2 = A + ((400 - A) * (B / (B + 300)));
 
             PointF[] srcs = new PointF[4];
             srcs[0] = new PointF((float)x1, 0);
@@ -109,14 +142,14 @@ namespace Engine
 
             PointF[] dsts = new PointF[4];
             dsts[0] = new PointF(0, 0);
-            dsts[1] = new PointF(600, 0);
+            dsts[1] = new PointF(400, 0);
             dsts[2] = new PointF(400, 300);
             dsts[3] = new PointF(0, 300);
 
             HomographyMatrix mywarpmat = CameraCalibration.GetPerspectiveTransform(srcs, dsts);
-            WarpedImage = BoardImage.WarpPerspective(mywarpmat, 
-                Emgu.CV.CvEnum.INTER.CV_INTER_NN, 
-                Emgu.CV.CvEnum.WARP.CV_WARP_FILL_OUTLIERS, 
+            WarpedImage = BoardImage.WarpPerspective(mywarpmat,
+                Emgu.CV.CvEnum.INTER.CV_INTER_NN,
+                Emgu.CV.CvEnum.WARP.CV_WARP_FILL_OUTLIERS,
                 new Bgr(60, 40, 20));
         }
     }

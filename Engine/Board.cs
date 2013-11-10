@@ -20,11 +20,11 @@ namespace Engine
             private set;
         }
 
-        internal void FindCorners(LineSegment2D[] lines)
+        internal void FindGrid(LineSegment2D[] lines)
         {
-            const double MINLENGTH = 2.0;
+            const double MINLENGTH = 50.0;
             const double ANGLETOLHORIZ = Math.PI / 360.0;
-            const double ANGLETOLVERT = Math.PI / 8.0;
+            const double ANGLETOLVERT = Math.PI / 10.0;
 
             HorizLines = lines.Where(line => GetAngle(line) < ANGLETOLHORIZ && GetAngle(line) > -ANGLETOLHORIZ).
                 Where(x => x.Length > MINLENGTH).
@@ -33,16 +33,13 @@ namespace Engine
             VertLines = lines.Where(line => GetAngle(line) > (Math.PI / 2) - ANGLETOLVERT || GetAngle(line) < -(Math.PI / 2) + ANGLETOLVERT).
                 Where(x => x.Length > MINLENGTH).
                 OrderBy(x => x.P1.Y).ToArray();
-
-            CalculateBoardAngle(VertLines);
         }
 
-        private void CalculateBoardAngle(LineSegment2D[] vertLines)
+        internal OLSRegression GetBoardRegression()
         {
-            List<FullLine> lines = new List<FullLine>();
-            StringBuilder sb = new StringBuilder();
+            List<FullLine> fullLines = new List<FullLine>();
 
-            foreach (LineSegment2D lineSegment in vertLines)
+            foreach (LineSegment2D lineSegment in VertLines)
             {
                 // Set lowest point as p1
                 var p1 = lineSegment.P1;
@@ -58,18 +55,14 @@ namespace Engine
                 double c = (double)p1.X - ((double)p1.Y * m);
 
                 FullLine fullLine = new FullLine(m, c);
-                lines.Add(fullLine);
-
-                sb.AppendLine(fullLine.ToString());
+                fullLines.Add(fullLine);
             }
 
-            OlsRegression = new OLSRegression();
-            OlsRegression.Perform(lines.ToArray());
+            OLSRegression olsRegression = new OLSRegression();
+            olsRegression.Perform(fullLines.ToArray());
 
-            string s = sb.ToString();
+            return olsRegression;
         }
-
-        internal OLSRegression OlsRegression { get; private set; }
 
         private static double GetAngle(LineSegment2D line)
         {
