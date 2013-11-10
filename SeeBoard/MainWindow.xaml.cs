@@ -28,13 +28,14 @@ namespace SeeBoard
         private void ButtonGo_Click(object sender, RoutedEventArgs e)
         {
             Engine.Engine engine = new Engine.Engine(); 
-            engine.BoardImagePath = System.IO.Path.GetFullPath(".\\..\\..\\..\\Images\\EmptyBoards\\Board4.jpg");
+            engine.BoardImagePath = System.IO.Path.GetFullPath(".\\..\\..\\..\\Images\\EmptyBoards\\Board1.jpg");
             engine.Process();
 
             OrigImage.Source = BitmapSourceConvert.ToBitmapSource(engine.BoardImage);
             GrayImage.Source = BitmapSourceConvert.ToBitmapSource(engine.GrayImage);
             CannyImage.Source = BitmapSourceConvert.ToBitmapSource(engine.CannyImage);
             LinesImage.Source = BitmapSourceConvert.ToBitmapSource(engine.LinesImage);
+            WarpedImage.Source = BitmapSourceConvert.ToBitmapSource(engine.WarpedImage);
         }
 
         public static class BitmapSourceConvert
