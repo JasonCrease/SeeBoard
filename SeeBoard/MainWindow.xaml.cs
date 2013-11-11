@@ -28,7 +28,7 @@ namespace SeeBoard
         private void ButtonGo_Click(object sender, RoutedEventArgs e)
         {
             Engine.Engine engine = new Engine.Engine(); 
-            engine.BoardImagePath = System.IO.Path.GetFullPath(".\\..\\..\\..\\Images\\Boards\\Board2.jpg");
+            engine.BoardImagePath = System.IO.Path.GetFullPath(".\\..\\Images\\Boards\\Board1.jpg");
             engine.Process();
 
             OrigImage.Source = BitmapSourceConvert.ToBitmapSource(engine.BoardImage);
