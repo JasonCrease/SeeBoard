@@ -128,27 +128,12 @@ namespace Engine
 
             Image<Bgr, Byte> warpedLinesImage = BoardImage.CopyBlank();
             foreach (LineSegment2D line in Lines)
-<<<<<<< HEAD
-<<<<<<< HEAD
-                linesImage.Draw(line, new Bgr(System.Drawing.Color.Gray), 1);
-            foreach (LineSegment2D line in boardLineFind2.HorizLines)
-                linesImage.Draw(line, new Bgr(System.Drawing.Color.Red), 1);
-            foreach (LineSegment2D line in boardLineFind2.VertLines)
-                linesImage.Draw(line, new Bgr(System.Drawing.Color.Green), 1);
-            LinesImage = linesImage;
-=======
-=======
->>>>>>> 20b42591060485b23865dedf15bc48fb4a303ce3
                 warpedLinesImage.Draw(line, new Bgr(System.Drawing.Color.Gray), 1);
             foreach (LineSegment2D line in m_Board.HorizLines)
                 warpedLinesImage.Draw(line, new Bgr(System.Drawing.Color.Red), 1);
             foreach (LineSegment2D line in m_Board.VertLines)
                 warpedLinesImage.Draw(line, new Bgr(System.Drawing.Color.Green), 1);
             WarpedLinesImage = warpedLinesImage;
-<<<<<<< HEAD
->>>>>>> 20b42591060485b23865dedf15bc48fb4a303ce3
-=======
->>>>>>> 20b42591060485b23865dedf15bc48fb4a303ce3
         }
 
         private void RemovePerspective(OLSRegression regression)
