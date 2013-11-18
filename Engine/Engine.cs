@@ -10,8 +10,6 @@ namespace Engine
 {
     public class Engine
     {
-        Board m_Board;
-
         public string BoardImagePath
         {
             get;
@@ -80,21 +78,24 @@ namespace Engine
                 )[0]; //Get the lines from the first channel
 
             // Find board
-            m_Board = new Board();
-            m_Board.FindGrid(Lines);
+            Board boardLineFind1 = new Board();
+            boardLineFind1.BuildLineSets(Lines, Math.PI / 30.0, Math.PI / 10.0);
 
             // Make lines image
             Image<Bgr, Byte> linesImage = BoardImage.CopyBlank();
             foreach (LineSegment2D line in Lines)
                 linesImage.Draw(line, new Bgr(System.Drawing.Color.Gray), 1);
-            foreach (LineSegment2D line in m_Board.HorizLines)
+            foreach (LineSegment2D line in boardLineFind1.HorizLines)
                 linesImage.Draw(line, new Bgr(System.Drawing.Color.Red), 1);
-            foreach (LineSegment2D line in m_Board.VertLines)
+            foreach (LineSegment2D line in boardLineFind1.VertLines)
                 linesImage.Draw(line, new Bgr(System.Drawing.Color.Green), 1);
             LinesImage = linesImage;
 
             // Remove perspective from image
-            RemovePerspective(m_Board.GetBoardRegression());
+            RemovePerspective(boardLineFind1.GetBoardRegression());
+
+
+
 
             // Convert the image to grayscale and filter out the noise
             GrayImage = WarpedImage.Convert<Gray, Byte>().PyrDown().PyrUp();
@@ -112,17 +113,17 @@ namespace Engine
                 )[0]; //Get the lines from the first channel
 
             // Find board
-            m_Board = new Board();
-            m_Board.FindGrid(Lines);
+            Board boardLineFind2 = new Board();
+            boardLineFind2.BuildLineSets(Lines, Math.PI / 360.0, Math.PI / 360.0);
 
             // Make lines image
 
             linesImage = BoardImage.CopyBlank();
             foreach (LineSegment2D line in Lines)
                 linesImage.Draw(line, new Bgr(System.Drawing.Color.Gray), 1);
-            foreach (LineSegment2D line in m_Board.HorizLines)
+            foreach (LineSegment2D line in boardLineFind2.HorizLines)
                 linesImage.Draw(line, new Bgr(System.Drawing.Color.Red), 1);
-            foreach (LineSegment2D line in m_Board.VertLines)
+            foreach (LineSegment2D line in boardLineFind2.VertLines)
                 linesImage.Draw(line, new Bgr(System.Drawing.Color.Green), 1);
             LinesImage = linesImage;
         }

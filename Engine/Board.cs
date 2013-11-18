@@ -20,17 +20,17 @@ namespace Engine
             private set;
         }
 
-        internal void FindGrid(LineSegment2D[] lines)
+        internal void BuildLineSets(LineSegment2D[] lines, double vertTol, double horizTol)
         {
             const double MINLENGTH = 50.0;
-            const double ANGLETOLHORIZ = Math.PI / 360.0;
-            const double ANGLETOLVERT = Math.PI / 10.0;
+            //const double ANGLETOLHORIZ = ; //;
+            //const double ANGLETOLVERT = ;  // Math.PI / 10.0;
 
-            HorizLines = lines.Where(line => GetAngle(line) < ANGLETOLHORIZ && GetAngle(line) > -ANGLETOLHORIZ).
+            HorizLines = lines.Where(line => GetAngle(line) < horizTol && GetAngle(line) > -horizTol).
                 Where(x => x.Length > MINLENGTH).
                 OrderBy(x => x.P1.X).ToArray();
 
-            VertLines = lines.Where(line => GetAngle(line) > (Math.PI / 2) - ANGLETOLVERT || GetAngle(line) < -(Math.PI / 2) + ANGLETOLVERT).
+            VertLines = lines.Where(line => GetAngle(line) > (Math.PI / 2) - vertTol || GetAngle(line) < -(Math.PI / 2) + vertTol).
                 Where(x => x.Length > MINLENGTH).
                 OrderBy(x => x.P1.Y).ToArray();
         }
