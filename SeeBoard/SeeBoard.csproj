@@ -21,7 +21,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>..\bin\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -37,13 +37,13 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Emgu.CV">
-      <HintPath>..\..\emgucv\bin\Emgu.CV.dll</HintPath>
+      <HintPath>..\..\..\Emgu\bin\Emgu.CV.dll</HintPath>
     </Reference>
     <Reference Include="Emgu.CV.UI">
-      <HintPath>..\..\emgucv\bin\Emgu.CV.UI.dll</HintPath>
+      <HintPath>..\..\..\Emgu\bin\Emgu.CV.UI.dll</HintPath>
     </Reference>
     <Reference Include="Emgu.Util">
-      <HintPath>..\..\emgucv\bin\Emgu.Util.dll</HintPath>
+      <HintPath>..\..\..\Emgu\bin\Emgu.Util.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -106,10 +106,6 @@
     <ProjectReference Include="..\Engine\Engine.csproj">
       <Project>{F701E3E0-0A40-4357-BCFD-7829738AD749}</Project>
       <Name>Engine</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\UnmanagedDLLs\UnmanagedDLLs.csproj">
-      <Project>{EAE03A7D-BC48-40FD-9B56-CE5389D0D074}</Project>
-      <Name>UnmanagedDLLs</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -18,17 +18,22 @@ namespace Engine
 
         public Image<Bgr, Byte> BoardImage
         {
-            get;
-            private set;
+            get;private set;
         }
-
         public Image<Gray, Byte> GrayImage
+        {
+            get;private set;
+        }
+        public Image<Gray, Byte> CannyImage
+        {
+            get;private set;
+        }
+        public LineSegment2D[] Lines
         {
             get;
             private set;
         }
-
-        public Image<Gray, Byte> CannyImage
+        public Image<Bgr, Byte> LinesImage
         {
             get;
             private set;
@@ -36,20 +41,23 @@ namespace Engine
 
         public Image<Bgr, byte> WarpedImage
         {
-            get;
-            private set;
+            get; private set;
         }
-
-        public LineSegment2D[] Lines
+        public Image<Gray, byte> WarpedGrayImage
         {
-            get;
-            private set;
+            get; private set;
         }
-
-        public Image<Bgr, Byte> LinesImage
+        public Image<Gray, Byte> WarpedCannyImage
         {
-            get;
-            private set;
+            get; private set;
+        }
+        public LineSegment2D[] WarpedLines
+        {
+            get; private set;
+        }
+        public Image<Bgr, Byte> WarpedLinesImage
+        {
+            get; private set;
         }
 
         public Engine()
@@ -98,13 +106,13 @@ namespace Engine
 
 
             // Convert the image to grayscale and filter out the noise
-            GrayImage = WarpedImage.Convert<Gray, Byte>().PyrDown().PyrUp();
+            WarpedGrayImage = WarpedImage.Convert<Gray, Byte>().PyrDown().PyrUp();
 
             // Do canny filter
-            CannyImage = GrayImage.Canny(120.0, 80.0);
+            WarpedCannyImage = GrayImage.Canny(120.0, 80.0);
 
             // Do Edge finder
-            Lines = CannyImage.HoughLinesBinary(
+            WarpedLines = WarpedCannyImage.HoughLinesBinary(
                 1, //Distance resolution in pixel-related units
                 Math.PI / 360.0, //Angle resolution measured in radians.
                 20, //threshold
@@ -118,14 +126,23 @@ namespace Engine
 
             // Make lines image
 
-            linesImage = BoardImage.CopyBlank();
+            Image<Bgr, Byte> warpedLinesImage = BoardImage.CopyBlank();
             foreach (LineSegment2D line in Lines)
+<<<<<<< HEAD
                 linesImage.Draw(line, new Bgr(System.Drawing.Color.Gray), 1);
             foreach (LineSegment2D line in boardLineFind2.HorizLines)
                 linesImage.Draw(line, new Bgr(System.Drawing.Color.Red), 1);
             foreach (LineSegment2D line in boardLineFind2.VertLines)
                 linesImage.Draw(line, new Bgr(System.Drawing.Color.Green), 1);
             LinesImage = linesImage;
+=======
+                warpedLinesImage.Draw(line, new Bgr(System.Drawing.Color.Gray), 1);
+            foreach (LineSegment2D line in m_Board.HorizLines)
+                warpedLinesImage.Draw(line, new Bgr(System.Drawing.Color.Red), 1);
+            foreach (LineSegment2D line in m_Board.VertLines)
+                warpedLinesImage.Draw(line, new Bgr(System.Drawing.Color.Green), 1);
+            WarpedLinesImage = warpedLinesImage;
+>>>>>>> 20b42591060485b23865dedf15bc48fb4a303ce3
         }
 
         private void RemovePerspective(OLSRegression regression)
