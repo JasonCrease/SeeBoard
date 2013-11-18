@@ -26,12 +26,14 @@ namespace SeeBoard
             this.Top = 30;
 
             InitializeComponent();
+
+            ButtonGo_Click(this, null);
         }
 
         private void ButtonGo_Click(object sender, RoutedEventArgs e)
         {
             Engine.Engine engine = new Engine.Engine(); 
-            engine.BoardImagePath = System.IO.Path.GetFullPath(".\\..\\Images\\Boards\\Board2.jpg");
+            engine.BoardImagePath = System.IO.Path.GetFullPath(".\\..\\Images\\EmptyBoards\\Board2.jpg");
             engine.Process();
 
             OrigImage.Source = BitmapSourceConvert.ToBitmapSource(engine.BoardImage);
@@ -41,6 +43,7 @@ namespace SeeBoard
             WarpedImage.Source = BitmapSourceConvert.ToBitmapSource(engine.WarpedImage);
             WarpedCannyImage.Source = BitmapSourceConvert.ToBitmapSource(engine.WarpedCannyImage);
             WarpedLinesImage.Source = BitmapSourceConvert.ToBitmapSource(engine.WarpedLinesImage);
+            GridBoxesImage.Source = BitmapSourceConvert.ToBitmapSource(engine.GridBoxesImage);
         }
 
         public static class BitmapSourceConvert

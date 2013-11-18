@@ -54,6 +54,7 @@
     <Compile Include="Board.cs" />
     <Compile Include="Engine.cs" />
     <Compile Include="FFT.cs" />
+    <Compile Include="FFT2.cs" />
     <Compile Include="OLSRegression.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

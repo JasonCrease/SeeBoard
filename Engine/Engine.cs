@@ -61,6 +61,12 @@ namespace Engine
         {
             get; private set;
         }
+        public Image<Bgr, Byte> GridBoxesImage
+        {
+            get;
+            private set;
+        }
+
 
         public Engine()
         {
@@ -128,29 +134,43 @@ namespace Engine
 
             // Make lines image
             Image<Bgr, Byte> warpedLinesImage = BoardImage.CopyBlank();
+            Image<Gray, Byte> warpedGridLinesImage = WarpedGrayImage.CopyBlank();
 
             foreach (LineSegment2D line in WarpedLines)
                 warpedLinesImage.Draw(line, new Bgr(System.Drawing.Color.Gray), 1);
             foreach (LineSegment2D line in boardLineFind2.HorizLines)
+            {
+                warpedGridLinesImage.Draw(line, new Gray(100), 1);
                 warpedLinesImage.Draw(line, new Bgr(System.Drawing.Color.Red), 1);
+            }
             foreach (LineSegment2D line in boardLineFind2.VertLines)
+            {
+                warpedGridLinesImage.Draw(line, new Gray(100), 1);
                 warpedLinesImage.Draw(line, new Bgr(System.Drawing.Color.Green), 1);
+            }
             WarpedLinesImage = warpedLinesImage;
 
+            GridBoxesImage = WarpedImage.Copy();
 
-
-            // Take cut down centre for DFT
-            double[] data = new double[256];
-            for(int i=0; i< 320; i++)
+            // Take cut down centre for grid-finder
+            MemStorage storage = new MemStorage();
+            for (Contour<Point> contours = warpedGridLinesImage.FindContours(
+                     Emgu.CV.CvEnum.CHAIN_APPROX_METHOD.CV_CHAIN_APPROX_SIMPLE,
+                     Emgu.CV.CvEnum.RETR_TYPE.CV_RETR_LIST,
+                     storage);
+                  contours != null;
+                  contours = contours.HNext)
             {
-                int x = 400 * 256 + i;
-                data[i] += warpedLinesImage.Data[x, 200, 0] + 
-                    warpedLinesImage.Data[x, 250, 0] + 
-                    warpedLinesImage.Data[x, 300, 0] ;
-            };
-
-            m_FFT.RealFFT(data, true);
-
+                Contour<Point> currentContour = contours.ApproxPoly(contours.Perimeter * 0.05, storage);
+                if (currentContour.Area > 20) //only consider contours with area greater than 250
+                {
+                    if (currentContour.Total == 4)
+                    {
+                        GridBoxesImage.Draw(currentContour.GetMinAreaRect(), new Bgr(100, 200, 0), 2);
+                    }
+                }
+            }
+            
         }
 
         private void RemovePerspective(OLSRegression regression)
