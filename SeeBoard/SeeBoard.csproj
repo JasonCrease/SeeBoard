@@ -37,13 +37,13 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Emgu.CV">
-      <HintPath>..\..\..\Emgu\bin\Emgu.CV.dll</HintPath>
+      <HintPath>..\..\..\EmguCV\bin\Emgu.CV.dll</HintPath>
     </Reference>
     <Reference Include="Emgu.CV.UI">
-      <HintPath>..\..\..\Emgu\bin\Emgu.CV.UI.dll</HintPath>
+      <HintPath>..\..\..\EmguCV\bin\Emgu.CV.UI.dll</HintPath>
     </Reference>
     <Reference Include="Emgu.Util">
-      <HintPath>..\..\..\Emgu\bin\Emgu.Util.dll</HintPath>
+      <HintPath>..\..\..\EmguCV\bin\Emgu.Util.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />

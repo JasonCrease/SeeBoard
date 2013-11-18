@@ -10,6 +10,8 @@ namespace Engine
 {
     public class Engine
     {
+        public LombardFFT m_FFT = new LombardFFT();
+
         public string BoardImagePath
         {
             get;
@@ -87,7 +89,7 @@ namespace Engine
 
             // Find board
             Board boardLineFind1 = new Board();
-            boardLineFind1.BuildLineSets(Lines, Math.PI / 30.0, Math.PI / 10.0);
+            boardLineFind1.BuildLineSets(Lines, Math.PI / 10.0, Math.PI / 50.0);
 
             // Make lines image
             Image<Bgr, Byte> linesImage = BoardImage.CopyBlank();
@@ -109,31 +111,46 @@ namespace Engine
             WarpedGrayImage = WarpedImage.Convert<Gray, Byte>().PyrDown().PyrUp();
 
             // Do canny filter
-            WarpedCannyImage = GrayImage.Canny(120.0, 80.0);
+            WarpedCannyImage = WarpedGrayImage.Canny(160.0, 120.0);
 
             // Do Edge finder
             WarpedLines = WarpedCannyImage.HoughLinesBinary(
                 1, //Distance resolution in pixel-related units
                 Math.PI / 360.0, //Angle resolution measured in radians.
-                20, //threshold
-                20, //min Line width
+                50, //threshold
+                70, //min Line width
                 20 //gap between lines
                 )[0]; //Get the lines from the first channel
 
             // Find board
             Board boardLineFind2 = new Board();
-            boardLineFind2.BuildLineSets(Lines, Math.PI / 360.0, Math.PI / 360.0);
+            boardLineFind2.BuildLineSets(WarpedLines, Math.PI / 360.0, Math.PI / 360.0);
 
             // Make lines image
-
             Image<Bgr, Byte> warpedLinesImage = BoardImage.CopyBlank();
-            foreach (LineSegment2D line in Lines)
+
+            foreach (LineSegment2D line in WarpedLines)
                 warpedLinesImage.Draw(line, new Bgr(System.Drawing.Color.Gray), 1);
-            foreach (LineSegment2D line in m_Board.HorizLines)
+            foreach (LineSegment2D line in boardLineFind2.HorizLines)
                 warpedLinesImage.Draw(line, new Bgr(System.Drawing.Color.Red), 1);
-            foreach (LineSegment2D line in m_Board.VertLines)
+            foreach (LineSegment2D line in boardLineFind2.VertLines)
                 warpedLinesImage.Draw(line, new Bgr(System.Drawing.Color.Green), 1);
             WarpedLinesImage = warpedLinesImage;
+
+
+
+            // Take cut down centre for DFT
+            double[] data = new double[256];
+            for(int i=0; i< 320; i++)
+            {
+                int x = 400 * 256 + i;
+                data[i] += warpedLinesImage.Data[x, 200, 0] + 
+                    warpedLinesImage.Data[x, 250, 0] + 
+                    warpedLinesImage.Data[x, 300, 0] ;
+            };
+
+            m_FFT.RealFFT(data, true);
+
         }
 
         private void RemovePerspective(OLSRegression regression)
