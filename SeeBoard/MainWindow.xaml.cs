@@ -22,7 +22,7 @@ namespace SeeBoard
     {
         public MainWindow()
         {
-            this.Left = 1600;
+            this.Left = 1550;
             this.Top = 30;
 
             InitializeComponent();

@@ -76,7 +76,7 @@ namespace Engine
         public void Process()
         {
             // Build original image, downscaled slightly
-            BoardImage = new Image<Bgr, byte>(BoardImagePath).Resize(400, 300, Emgu.CV.CvEnum.INTER.CV_INTER_LINEAR, true);
+            BoardImage = new Image<Bgr, byte>(BoardImagePath).Resize(400, 300, Emgu.CV.CvEnum.INTER.CV_INTER_CUBIC, true);
 
             // Convert the image to grayscale and filter out the noise
             GrayImage = BoardImage.Convert<Gray, Byte>().PyrDown().PyrUp();
@@ -130,10 +130,10 @@ namespace Engine
 
             // Find board
             Board boardLineFind2 = new Board();
-            boardLineFind2.BuildLineSets(WarpedLines, Math.PI / 360.0, Math.PI / 360.0);
+            boardLineFind2.BuildLineSets(WarpedLines, Math.PI / 120.0, Math.PI / 120.0);
 
             // Make lines image
-            Image<Bgr, Byte> warpedLinesImage = BoardImage.CopyBlank();
+            Image<Bgr, Byte> warpedLinesImage = WarpedImage.CopyBlank();
             Image<Gray, Byte> warpedGridLinesImage = WarpedGrayImage.CopyBlank();
 
             foreach (LineSegment2D line in WarpedLines)
@@ -154,6 +154,8 @@ namespace Engine
 
 
             // Find grid boxes
+            List<GridBox> boxes = new List<GridBox>();
+
             for (int hi1 = 0; hi1 < boardLineFind2.HorizLines.Length - 1; hi1++)
                 for (int hi2 = hi1 + 1; hi2 < boardLineFind2.HorizLines.Length; hi2++)
                 {
@@ -165,19 +167,51 @@ namespace Engine
                         {
                             var lineV1 = boardLineFind2.VertLines[vi1];
                             var lineV2 = boardLineFind2.VertLines[vi2];
-                            
-                            if(DoLinesIntersect(lineH1.P1, lineH1.P2, lineV1.P1, lineV1.P2))
+
+                            PointF[] points = FindQuad(lineH1, lineH2, lineV1, lineV2);
+
+                            if (points != null)
                             {
-                                FindLineSegmentIntersection(lineH1.P1, lineH1.P2, lineV1.P1, lineV1.P2);
-                                if(lineSegmentIntersectX < 400)
-                                    GridBoxesImage.Draw(new CircleF(
-                                        new PointF(lineSegmentIntersectX, lineSegmentIntersectY)
-                                        , 2), new Bgr(100, 200, 100), 2);
+                                boxes.Add(new GridBox(points));
+                                DrawRectangle(GridBoxesImage, points, new Bgr(50, 200, 100), 2);
                             }
                         }
                 }
+            FilterOutBadBoxes(boxes);
 
+        }
 
+        private void FilterOutBadBoxes(List<PointF[]> boxes)
+        {
+            List<PointF[]> bs1 = new List<PointF[]>();
+
+            bs1 = boxes.Where(x => x
+        }
+
+        private void DrawRectangle(Image<Bgr, byte> image, PointF[] ps, Bgr bgr, int thickness)
+        {
+            image.Draw(new LineSegment2DF(ps[0], ps[1]), bgr, thickness);
+            image.Draw(new LineSegment2DF(ps[1], ps[2]), bgr, thickness);
+            image.Draw(new LineSegment2DF(ps[2], ps[3]), bgr, thickness);
+            image.Draw(new LineSegment2DF(ps[3], ps[0]), bgr, thickness);
+        }
+
+        private PointF[] FindQuad(LineSegment2D lineH1, LineSegment2D lineH2, LineSegment2D lineV1, LineSegment2D lineV2)
+        {
+            PointF[] ps = new PointF[4];
+
+            bool b0 = FindLineSegmentIntersection(lineH1.P1, lineH1.P2, lineV1.P1, lineV1.P2);
+            ps[0] = new PointF(lineSegmentIntersectX, lineSegmentIntersectY);
+            bool b1 = FindLineSegmentIntersection(lineH1.P1, lineH1.P2, lineV2.P1, lineV2.P2);
+            ps[1] = new PointF(lineSegmentIntersectX, lineSegmentIntersectY);
+            bool b2 = FindLineSegmentIntersection(lineH2.P1, lineH2.P2, lineV2.P1, lineV2.P2);
+            ps[2] = new PointF(lineSegmentIntersectX, lineSegmentIntersectY);
+            bool b3 = FindLineSegmentIntersection(lineH2.P1, lineH2.P2, lineV1.P1, lineV1.P2);
+            ps[3] = new PointF(lineSegmentIntersectX, lineSegmentIntersectY);
+
+            if (b0 && b1 && b2 && b3) return ps;
+
+            return null;
         }
 
         public static bool DoLinesIntersect(Point lineA1, Point lineA2, Point lineB1, Point lineB2)
@@ -249,10 +283,28 @@ namespace Engine
             dsts[3] = new PointF(0, 300);
 
             HomographyMatrix mywarpmat = CameraCalibration.GetPerspectiveTransform(srcs, dsts);
-            WarpedImage = BoardImage.WarpPerspective(mywarpmat,
-                Emgu.CV.CvEnum.INTER.CV_INTER_NN,
+            WarpedImage = BoardImage.WarpPerspective(mywarpmat, 400, 300,
+                Emgu.CV.CvEnum.INTER.CV_INTER_CUBIC,
                 Emgu.CV.CvEnum.WARP.CV_WARP_FILL_OUTLIERS,
-                new Bgr(60, 40, 20));
+                GetBottomBorderColor(BoardImage));
+        }
+
+        private Bgr GetBottomBorderColor(Image<Bgr, byte> image )
+        {
+            int totalB = 0;
+            int totalG = 0;
+            int totalR = 0;
+            int width = image.Width;
+            int height = image.Height;
+
+            for (int i = 0; i < image.Width; i++)
+            {
+                totalB += image.Data[height - 1, i, 0];
+                totalG += image.Data[height - 1, i, 1];
+                totalR += image.Data[height - 1, i, 2];
+            }
+
+            return new Bgr(totalB / width, totalG / width, totalR / width);
         }
     }
 }

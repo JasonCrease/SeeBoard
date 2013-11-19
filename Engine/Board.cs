@@ -28,11 +28,11 @@ namespace Engine
 
             HorizLines = lines.Where(line => GetAngle(line) < horizTol && GetAngle(line) > -horizTol).
                 Where(x => x.Length > MINLENGTH).
-                OrderBy(x => x.P1.X).ToArray();
+                OrderBy(x => x.P1.Y).ToArray();
 
             VertLines = lines.Where(line => GetAngle(line) > (Math.PI / 2) - vertTol || GetAngle(line) < -(Math.PI / 2) + vertTol).
                 Where(x => x.Length > MINLENGTH).
-                OrderBy(x => x.P1.Y).ToArray();
+                OrderBy(x => x.P1.X).ToArray();
         }
 
         internal OLSRegression GetBoardRegression()
