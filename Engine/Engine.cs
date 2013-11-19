@@ -154,7 +154,7 @@ namespace Engine
 
 
             // Find grid boxes
-            List<GridBox> boxes = new List<GridBox>();
+            List<GridQuad> boxes = new List<GridQuad>();
 
             for (int hi1 = 0; hi1 < boardLineFind2.HorizLines.Length - 1; hi1++)
                 for (int hi2 = hi1 + 1; hi2 < boardLineFind2.HorizLines.Length; hi2++)
@@ -172,20 +172,50 @@ namespace Engine
 
                             if (points != null)
                             {
-                                boxes.Add(new GridBox(points));
-                                DrawRectangle(GridBoxesImage, points, new Bgr(50, 200, 100), 2);
+                                boxes.Add(new GridQuad(points));
                             }
                         }
                 }
-            FilterOutBadBoxes(boxes);
+
+            var boxesToDraw = FilterOutBadBoxes(boxes);
+            foreach(GridQuad gridQuad in boxesToDraw)
+                DrawRectangle(GridBoxesImage, gridQuad.p, new Bgr(50, 200, 100), 2);
 
         }
 
-        private void FilterOutBadBoxes(List<PointF[]> boxes)
+        private GridQuad[] FilterOutBadBoxes(List<GridQuad> boxes)
         {
-            List<PointF[]> bs1 = new List<PointF[]>();
+            const float MAXAREA = 400f * 300f / 64f;
+            const float MINAREA = (400f * 300f / 64f) / 3f;
 
-            bs1 = boxes.Where(x => x
+            const float MAXWIDTH = 400f / 8f;
+            const float MINWIDTH = (400f / 8f) / 1.5f;
+
+            const float MAXHEIGHT = 300f / 8f;
+            const float MINHEIGHT = (300f / 8f) / 2f;
+
+            var bs1 = boxes.Where(x => x.Area < MAXAREA && x.Area > MINAREA).ToArray();
+            var bs2 = bs1.Where(x => x.Width < MAXWIDTH && x.Width > MINWIDTH).ToArray();
+            var bs3 = bs2.Where(x => x.Height < MAXHEIGHT && x.Height > MINHEIGHT).ToArray();
+            var bs4 = bs3.OrderBy(x => x.Area).ToArray();
+
+            float minDiffToBox64Ago = 99999f;
+            int indexAtMinDiff = 999;
+
+            for (int i = 64; i < bs4.Length; i++)
+            {
+                float diffToBox64Ago = bs4[i].Area - bs4[i - 64].Area;
+                if (diffToBox64Ago < minDiffToBox64Ago)
+                {
+                    indexAtMinDiff = i;
+                    minDiffToBox64Ago = diffToBox64Ago;
+                }
+            }
+
+            var medianBox = bs4[indexAtMinDiff - 32];
+            var bsfinal = bs4.Where(x => x.Area > medianBox.Area - 50f && x.Area < medianBox.Area + 50f).ToArray();
+
+            return bsfinal;
         }
 
         private void DrawRectangle(Image<Bgr, byte> image, PointF[] ps, Bgr bgr, int thickness)

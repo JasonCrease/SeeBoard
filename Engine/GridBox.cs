@@ -5,21 +5,43 @@ using System.Text;
 
 namespace Engine
 {
-    public struct GridBox
+    /// <summary>
+    ///  Points must be clockwise from top-left
+    /// </summary>
+    public struct GridQuad
     {
-        public int W;
-        public int H;
-        public int X;
-        public int Y;
-        public int Area;
-
-        public GridBox(int w, int h, int x, int y)
+        public float Area
         {
-            W = w;
-            H = h;
-            X = x;
-            Y = y;
-            Area = w * h;
+            get
+            {
+                return 0.5f * Math.Abs(
+                    ((p[2].X - p[0].X) * (p[3].Y - p[1].Y)) -
+                    ((p[3].X - p[1].X) * (p[2].Y - p[0].Y))
+                    );
+            }
+        }
+
+        public System.Drawing.PointF[] p;
+
+        public GridQuad(System.Drawing.PointF[] points)
+        {
+            this.p = points;
+        }
+
+        public float Width
+        {
+            get
+            {
+                return Math.Max(p[1].X, p[2].X) - Math.Min(p[0].X, p[3].X);
+            }
+        }
+
+        public float Height
+        {
+            get
+            {
+                return Math.Max(p[2].Y, p[3].Y) - Math.Min(p[0].Y, p[1].Y);
+            }
         }
     }
 }
