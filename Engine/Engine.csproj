@@ -55,6 +55,7 @@
     <Compile Include="Engine.cs" />
     <Compile Include="FFT.cs" />
     <Compile Include="FFT2.cs" />
+    <Compile Include="GridBox.cs" />
     <Compile Include="OLSRegression.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

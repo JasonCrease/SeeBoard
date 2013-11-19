@@ -152,7 +152,12 @@ namespace Engine
 
             GridBoxesImage = WarpedImage.Copy();
 
-            // Take cut down centre for grid-finder
+
+
+
+            // Find grid boxes
+            List<MCvBox2D> boxes = new List<MCvBox2D>();
+
             MemStorage storage = new MemStorage();
             for (Contour<Point> contours = warpedGridLinesImage.FindContours(
                      Emgu.CV.CvEnum.CHAIN_APPROX_METHOD.CV_CHAIN_APPROX_SIMPLE,
@@ -162,15 +167,18 @@ namespace Engine
                   contours = contours.HNext)
             {
                 Contour<Point> currentContour = contours.ApproxPoly(contours.Perimeter * 0.05, storage);
-                if (currentContour.Area > 20) //only consider contours with area greater than 250
+                if (currentContour.Area > 20 && currentContour.Area < (400 * 250) / 64 ) //only consider contours with area greater than 250
                 {
                     if (currentContour.Total == 4)
                     {
-                        GridBoxesImage.Draw(currentContour.GetMinAreaRect(), new Bgr(100, 200, 0), 2);
+                        MCvBox2D minRect = currentContour.GetMinAreaRect();
+                        boxes.Add(minRect);
+                        GridBoxesImage.Draw(minRect, new Bgr(140, 240, 0), 3);
                     }
                 }
             }
-            
+
+            boxes = boxes.OrderBy(x => x.size.Height * x.size.Width).ToList();
         }
 
         private void RemovePerspective(OLSRegression regression)
