@@ -90,7 +90,7 @@ namespace Engine
                 Math.PI / 360.0, //Angle resolution measured in radians.
                 50, //threshold
                 20, //min Line width
-                40 //gap between lines
+                20 //gap between lines
                 )[0]; //Get the lines from the first channel
 
             // Find board
@@ -125,12 +125,12 @@ namespace Engine
                 Math.PI / 360.0, //Angle resolution measured in radians.
                 50, //threshold
                 20, //min Line width
-                40 //gap between lines
+                80 //gap between lines
                 )[0]; //Get the lines from the first channel
 
             // Find board
             Board boardLineFind2 = new Board();
-            boardLineFind2.BuildLineSets(WarpedLines, Math.PI / 120.0, Math.PI / 120.0);
+            boardLineFind2.BuildLineSets(WarpedLines, Math.PI / 160.0, Math.PI / 160.0);
 
             // Make lines image
             Image<Bgr, Byte> warpedLinesImage = WarpedImage.CopyBlank();
@@ -178,33 +178,37 @@ namespace Engine
                 }
 
             var boxesToDraw = FilterOutBadBoxes(boxes);
-            foreach(GridQuad gridQuad in boxesToDraw)
-                DrawRectangle(GridBoxesImage, gridQuad.p, new Bgr(50, 200, 100), 2);
+
+            for (int i = 0; i < boxesToDraw.Length; i++)
+                DrawRectangle(GridBoxesImage, boxesToDraw[i].p, new Bgr(50, 200, 100), 2);
+
+            DrawRectangle(GridBoxesImage, medianBox.p, new Bgr(220, 150, 100), 3);
 
         }
 
         private GridQuad[] FilterOutBadBoxes(List<GridQuad> boxes)
         {
             const float MAXAREA = 400f * 300f / 64f;
-            const float MINAREA = (400f * 300f / 64f) / 3f;
+            const float MINAREA = (400f * 300f / 64f) / 5f;
 
             const float MAXWIDTH = 400f / 8f;
-            const float MINWIDTH = (400f / 8f) / 1.5f;
+            const float MINWIDTH = (400f / 8f) / 2f;
 
             const float MAXHEIGHT = 300f / 8f;
-            const float MINHEIGHT = (300f / 8f) / 2f;
+            const float MINHEIGHT = (300f / 8f) / 2.5f;
 
             var bs1 = boxes.Where(x => x.Area < MAXAREA && x.Area > MINAREA).ToArray();
             var bs2 = bs1.Where(x => x.Width < MAXWIDTH && x.Width > MINWIDTH).ToArray();
             var bs3 = bs2.Where(x => x.Height < MAXHEIGHT && x.Height > MINHEIGHT).ToArray();
-            var bs4 = bs3.OrderBy(x => x.Area).ToArray();
+            var bs4 = bs3.Where(x => x.Height < x.Width && x.Width < x.Height * 2.5f).ToArray();
+            var bs5 = bs4.OrderBy(x => x.Area).ToArray();
 
             float minDiffToBox64Ago = 99999f;
             int indexAtMinDiff = 999;
 
             for (int i = 64; i < bs4.Length; i++)
             {
-                float diffToBox64Ago = bs4[i].Area - bs4[i - 64].Area;
+                float diffToBox64Ago = bs5[i].Area - bs5[i - 64].Area;
                 if (diffToBox64Ago < minDiffToBox64Ago)
                 {
                     indexAtMinDiff = i;
@@ -212,11 +216,17 @@ namespace Engine
                 }
             }
 
-            var medianBox = bs4[indexAtMinDiff - 32];
-            var bsfinal = bs4.Where(x => x.Area > medianBox.Area - 50f && x.Area < medianBox.Area + 50f).ToArray();
+            medianBox = bs5[indexAtMinDiff - 32];
+            var bsfinal = bs5.Where(x => x.Area > medianBox.Area - 100f && x.Area < medianBox.Area + 100f &&
+                                         x.Width > medianBox.Width - 4f && x.Width < medianBox.Width + 4f &&
+                                         x.Height > medianBox.Height - 4f && x.Height < medianBox.Height + 4f)
+                .OrderBy(b => b.Area)
+                .ToArray();
 
             return bsfinal;
         }
+
+        GridQuad medianBox;
 
         private void DrawRectangle(Image<Bgr, byte> image, PointF[] ps, Bgr bgr, int thickness)
         {
