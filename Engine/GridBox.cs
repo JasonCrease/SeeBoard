@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Drawing;
 
 namespace Engine
 {
@@ -21,7 +22,7 @@ namespace Engine
             }
         }
 
-        public System.Drawing.PointF[] p;
+        public PointF[] p;
 
         public GridQuad(System.Drawing.PointF[] points)
         {
@@ -33,6 +34,14 @@ namespace Engine
             get
             {
                 return Math.Max(p[1].X, p[2].X) - Math.Min(p[0].X, p[3].X);
+            }
+        }
+
+        public PointF Centroid
+        {
+            get
+            {
+                return new PointF((p[0].X + p[1].X + p[2].X + p[3].X) / 4, (p[0].Y + p[1].Y + p[2].Y + p[3].Y) / 4);
             }
         }
 
