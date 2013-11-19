@@ -27,7 +27,7 @@ namespace SeeBoard
 
             InitializeComponent();
 
-            ButtonGo_Click(this, null);
+            //ButtonGo_Click(this, null);
         }
 
         private void ButtonGo_Click(object sender, RoutedEventArgs e)

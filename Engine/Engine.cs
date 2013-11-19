@@ -82,15 +82,15 @@ namespace Engine
             GrayImage = BoardImage.Convert<Gray, Byte>().PyrDown().PyrUp();
 
             // Do canny filter
-            CannyImage = GrayImage.Canny(120.0, 80.0);
+            CannyImage = GrayImage.Canny(170.0, 50.0);
 
             // Do Edge finder
             Lines = CannyImage.HoughLinesBinary(
                 1, //Distance resolution in pixel-related units
                 Math.PI / 360.0, //Angle resolution measured in radians.
-                80, //threshold
+                50, //threshold
                 20, //min Line width
-                20 //gap between lines
+                40 //gap between lines
                 )[0]; //Get the lines from the first channel
 
             // Find board
@@ -124,8 +124,8 @@ namespace Engine
                 1, //Distance resolution in pixel-related units
                 Math.PI / 360.0, //Angle resolution measured in radians.
                 50, //threshold
-                70, //min Line width
-                20 //gap between lines
+                20, //min Line width
+                40 //gap between lines
                 )[0]; //Get the lines from the first channel
 
             // Find board
@@ -153,33 +153,81 @@ namespace Engine
             GridBoxesImage = WarpedImage.Copy();
 
 
-
-
             // Find grid boxes
-            List<MCvBox2D> boxes = new List<MCvBox2D>();
-
-            MemStorage storage = new MemStorage();
-            for (Contour<Point> contours = warpedGridLinesImage.FindContours(
-                     Emgu.CV.CvEnum.CHAIN_APPROX_METHOD.CV_CHAIN_APPROX_SIMPLE,
-                     Emgu.CV.CvEnum.RETR_TYPE.CV_RETR_LIST,
-                     storage);
-                  contours != null;
-                  contours = contours.HNext)
-            {
-                Contour<Point> currentContour = contours.ApproxPoly(contours.Perimeter * 0.05, storage);
-                if (currentContour.Area > 20 && currentContour.Area < (400 * 250) / 64 ) //only consider contours with area greater than 250
+            for (int hi1 = 0; hi1 < boardLineFind2.HorizLines.Length - 1; hi1++)
+                for (int hi2 = hi1 + 1; hi2 < boardLineFind2.HorizLines.Length; hi2++)
                 {
-                    if (currentContour.Total == 4)
-                    {
-                        MCvBox2D minRect = currentContour.GetMinAreaRect();
-                        boxes.Add(minRect);
-                        GridBoxesImage.Draw(minRect, new Bgr(140, 240, 0), 3);
-                    }
-                }
-            }
+                    var lineH1 = boardLineFind2.HorizLines[hi1];
+                    var lineH2 = boardLineFind2.HorizLines[hi2];
 
-            boxes = boxes.OrderBy(x => x.size.Height * x.size.Width).ToList();
+                    for (int vi1 = 0; vi1 < boardLineFind2.VertLines.Length - 1; vi1++)
+                        for (int vi2 = vi1 + 1; vi2 < boardLineFind2.VertLines.Length; vi2++)
+                        {
+                            var lineV1 = boardLineFind2.VertLines[vi1];
+                            var lineV2 = boardLineFind2.VertLines[vi2];
+                            
+                            if(DoLinesIntersect(lineH1.P1, lineH1.P2, lineV1.P1, lineV1.P2))
+                            {
+                                FindLineSegmentIntersection(lineH1.P1, lineH1.P2, lineV1.P1, lineV1.P2);
+                                if(lineSegmentIntersectX < 400)
+                                    GridBoxesImage.Draw(new CircleF(
+                                        new PointF(lineSegmentIntersectX, lineSegmentIntersectY)
+                                        , 2), new Bgr(100, 200, 100), 2);
+                            }
+                        }
+                }
+
+
         }
+
+        public static bool DoLinesIntersect(Point lineA1, Point lineA2, Point lineB1, Point lineB2)
+        {
+            return CrossProduct(lineA1, lineA2, lineB1) !=
+                   CrossProduct(lineA1, lineA2, lineB2) ||
+                   CrossProduct(lineB1, lineB2, lineA1) !=
+                   CrossProduct(lineB1, lineB2, lineA2);
+        }
+
+        public static double CrossProduct(Point p1, Point p2, Point p3)
+        {
+            return (p2.X - p1.X) * (p3.Y - p1.Y) - (p3.X - p1.X) * (p2.Y - p1.Y);
+        }
+
+
+        float lineSegmentIntersectX, lineSegmentIntersectY;
+
+        private bool FindLineSegmentIntersection(Point p1, Point p2, Point p3, Point p4)
+        {
+            return FindLineSegmentIntersection(p1.X, p1.Y, p2.X, p2.Y, p3.X, p3.Y, p4.X, p4.Y);
+        }
+
+        private bool FindLineSegmentIntersection(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4)
+        {
+            float x12 = x1 - x2;
+            float x34 = x3 - x4;
+            float y12 = y1 - y2;
+            float y34 = y3 - y4;
+
+            float c = x12 * y34 - y12 * x34;
+
+            if (Math.Abs(c) < 0.01)
+            {
+                // No intersection
+                return false;
+            }
+            else
+            {
+                // Intersection
+                float a = x1 * y2 - y1 * x2;
+                float b = x3 * y4 - y3 * x4;
+
+                lineSegmentIntersectX = (a * x34 - b * x12) / c;
+                lineSegmentIntersectY = (a * y34 - b * y12) / c;
+
+                return true;
+            }
+        }
+
 
         private void RemovePerspective(OLSRegression regression)
         {
