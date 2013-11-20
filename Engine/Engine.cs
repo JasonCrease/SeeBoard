@@ -94,21 +94,21 @@ namespace Engine
                 )[0]; //Get the lines from the first channel
 
             // Find board
-            Board boardLineFind1 = new Board();
-            boardLineFind1.BuildLineSets(Lines, Math.PI / 10.0, Math.PI / 50.0);
+            BoardFinder boardLineFinder1 = new BoardFinder();
+            boardLineFinder1.BuildLineSets(Lines, Math.PI / 10.0, Math.PI / 50.0);
 
             // Make lines image
             Image<Bgr, Byte> linesImage = BoardImage.CopyBlank();
             foreach (LineSegment2D line in Lines)
                 linesImage.Draw(line, new Bgr(System.Drawing.Color.Gray), 1);
-            foreach (LineSegment2D line in boardLineFind1.HorizLines)
+            foreach (LineSegment2D line in boardLineFinder1.HorizLines)
                 linesImage.Draw(line, new Bgr(System.Drawing.Color.Red), 1);
-            foreach (LineSegment2D line in boardLineFind1.VertLines)
+            foreach (LineSegment2D line in boardLineFinder1.VertLines)
                 linesImage.Draw(line, new Bgr(System.Drawing.Color.Green), 1);
             LinesImage = linesImage;
 
             // Remove perspective from image
-            RemovePerspective(boardLineFind1.GetBoardRegression());
+            RemovePerspective(boardLineFinder1.GetBoardRegression());
 
 
 
@@ -129,8 +129,8 @@ namespace Engine
                 )[0]; //Get the lines from the first channel
 
             // Find board
-            Board boardLineFind2 = new Board();
-            boardLineFind2.BuildLineSets(WarpedLines, Math.PI / 160.0, Math.PI / 160.0);
+            BoardFinder boardLineFinder2 = new BoardFinder();
+            boardLineFinder2.BuildLineSets(WarpedLines, Math.PI / 160.0, Math.PI / 160.0);
 
             // Make lines image
             Image<Bgr, Byte> warpedLinesImage = WarpedImage.CopyBlank();
@@ -138,12 +138,12 @@ namespace Engine
 
             foreach (LineSegment2D line in WarpedLines)
                 warpedLinesImage.Draw(line, new Bgr(System.Drawing.Color.Gray), 1);
-            foreach (LineSegment2D line in boardLineFind2.HorizLines)
+            foreach (LineSegment2D line in boardLineFinder2.HorizLines)
             {
                 warpedGridLinesImage.Draw(line, new Gray(100), 1);
                 warpedLinesImage.Draw(line, new Bgr(System.Drawing.Color.Red), 1);
             }
-            foreach (LineSegment2D line in boardLineFind2.VertLines)
+            foreach (LineSegment2D line in boardLineFinder2.VertLines)
             {
                 warpedGridLinesImage.Draw(line, new Gray(100), 1);
                 warpedLinesImage.Draw(line, new Bgr(System.Drawing.Color.Green), 1);
@@ -153,20 +153,146 @@ namespace Engine
             GridBoxesImage = WarpedImage.Copy();
 
 
-            // Find grid boxes
+            // Find grid quads
+
+            List<GridQuad> quads = FindBoardQuads(boardLineFinder2);
+            GridQuad[] quadsToChase = FilterOutBadQuads(quads);
+            GridQuad[] quadsToDraw = ChaseThe64Quads(quadsToChase);
+
+            for (int i = 0; i < quadsToDraw.Length; i++)
+                DrawRectangle(GridBoxesImage, quadsToDraw[i].p, new Bgr(50, 200, 100), 2);
+
+            DrawRectangle(GridBoxesImage, medianBox.p, new Bgr(220, 150, 100), 3);
+
+        }
+
+        private GridQuad[] ChaseThe64Quads(GridQuad[] quadsToChase)
+        {
+            List<GridQuad> quadTrain = new List<GridQuad>();
+            GridQuad nextQuad = medianBox;
+
+            while (true)
+            {
+                GridQuad guessBox = EstimateQuadPosition(nextQuad, Dir.E);
+                GridQuad guessQuad = GetSimilarQuad(guessBox, quadsToChase);
+
+                if (guessQuad == null) break;
+                nextQuad = guessQuad;
+                quadTrain.Add(guessQuad);
+            }
+            while (true)
+            {
+                GridQuad guessBox = EstimateQuadPosition(nextQuad, Dir.N);
+                GridQuad guessQuad = GetSimilarQuad(guessBox, quadsToChase);
+
+                if (guessQuad == null) break;
+                nextQuad = guessQuad;
+                quadTrain.Add(guessQuad);
+            }
+            while (true)
+            {
+                GridQuad guessBox = EstimateQuadPosition(nextQuad, Dir.W);
+                GridQuad guessQuad = GetSimilarQuad(guessBox, quadsToChase);
+
+                if (guessQuad == null) break;
+                nextQuad = guessQuad;
+                quadTrain.Add(guessQuad);
+            }
+            while (true)
+            {
+                GridQuad guessBox = EstimateQuadPosition(nextQuad, Dir.S);
+                GridQuad guessQuad = GetSimilarQuad(guessBox, quadsToChase);
+
+                if (guessQuad == null) break;
+                nextQuad = guessQuad;
+                quadTrain.Add(guessQuad);
+            }
+            while (true)
+            {
+                GridQuad guessBox = EstimateQuadPosition(nextQuad, Dir.E);
+                GridQuad guessQuad = GetSimilarQuad(guessBox, quadsToChase);
+
+                if (guessQuad == null) break;
+                nextQuad = guessQuad;
+                quadTrain.Add(guessQuad);
+            }
+
+
+            return quadTrain.ToArray();
+        }
+
+        private GridQuad GetSimilarQuad(GridQuad quad, GridQuad[] quadsToChase)
+        {
+            foreach (GridQuad gq in quadsToChase)
+            {
+                float similarity =
+                    Math.Abs(quad.p[0].X - gq.p[0].X) + Math.Abs(quad.p[0].Y - gq.p[0].Y) +
+                    Math.Abs(quad.p[1].X - gq.p[1].X) + Math.Abs(quad.p[1].Y - gq.p[1].Y) +
+                    Math.Abs(quad.p[2].X - gq.p[2].X) + Math.Abs(quad.p[2].Y - gq.p[2].Y) +
+                    Math.Abs(quad.p[3].X - gq.p[3].X) + Math.Abs(quad.p[3].Y - gq.p[3].Y);
+                if (similarity < 20) return gq;
+            }
+
+            return null;
+        }
+
+        private GridQuad EstimateQuadPosition(GridQuad quad, Dir dir)
+        {
+            PointF p0 = new PointF(quad.p[0].X, quad.p[0].Y);
+            PointF p1 = new PointF(quad.p[1].X, quad.p[1].Y);
+            PointF p2 = new PointF(quad.p[2].X, quad.p[2].Y);
+            PointF p3 = new PointF(quad.p[3].X, quad.p[3].Y);
+
+            if (dir == Dir.S)
+            {
+                p0.Y += quad.Height;
+                p1.Y += quad.Height;
+                p2.Y += quad.Height;
+                p3.Y += quad.Height;
+            }
+            else if (dir == Dir.N)
+            {
+                p0.Y -= quad.Height;
+                p1.Y -= quad.Height;
+                p2.Y -= quad.Height;
+                p3.Y -= quad.Height;
+            }
+            else if (dir == Dir.E)
+            {
+                p0.X += quad.Width;
+                p1.X += quad.Width;
+                p2.X += quad.Width;
+                p3.X += quad.Width;
+            }
+            else if (dir == Dir.W)
+            {
+                p0.X -= quad.Width;
+                p1.X -= quad.Width;
+                p2.X -= quad.Width;
+                p3.X -= quad.Width;
+            }
+
+            return new GridQuad(new PointF[] {p0, p1, p2, p3});
+        }
+
+        private enum Dir { N, E, S, W }
+
+
+        private List<GridQuad> FindBoardQuads(BoardFinder boardLineFinder)
+        {
             List<GridQuad> boxes = new List<GridQuad>();
 
-            for (int hi1 = 0; hi1 < boardLineFind2.HorizLines.Length - 1; hi1++)
-                for (int hi2 = hi1 + 1; hi2 < boardLineFind2.HorizLines.Length; hi2++)
+            for (int hi1 = 0; hi1 < boardLineFinder.HorizLines.Length - 1; hi1++)
+                for (int hi2 = hi1 + 1; hi2 < boardLineFinder.HorizLines.Length; hi2++)
                 {
-                    var lineH1 = boardLineFind2.HorizLines[hi1];
-                    var lineH2 = boardLineFind2.HorizLines[hi2];
+                    var lineH1 = boardLineFinder.HorizLines[hi1];
+                    var lineH2 = boardLineFinder.HorizLines[hi2];
 
-                    for (int vi1 = 0; vi1 < boardLineFind2.VertLines.Length - 1; vi1++)
-                        for (int vi2 = vi1 + 1; vi2 < boardLineFind2.VertLines.Length; vi2++)
+                    for (int vi1 = 0; vi1 < boardLineFinder.VertLines.Length - 1; vi1++)
+                        for (int vi2 = vi1 + 1; vi2 < boardLineFinder.VertLines.Length; vi2++)
                         {
-                            var lineV1 = boardLineFind2.VertLines[vi1];
-                            var lineV2 = boardLineFind2.VertLines[vi2];
+                            var lineV1 = boardLineFinder.VertLines[vi1];
+                            var lineV2 = boardLineFinder.VertLines[vi2];
 
                             PointF[] points = FindQuad(lineH1, lineH2, lineV1, lineV2);
 
@@ -177,16 +303,10 @@ namespace Engine
                         }
                 }
 
-            var boxesToDraw = FilterOutBadBoxes(boxes);
-
-            for (int i = 0; i < boxesToDraw.Length; i++)
-                DrawRectangle(GridBoxesImage, boxesToDraw[i].p, new Bgr(50, 200, 100), 2);
-
-            DrawRectangle(GridBoxesImage, medianBox.p, new Bgr(220, 150, 100), 3);
-
+            return boxes;
         }
 
-        private GridQuad[] FilterOutBadBoxes(List<GridQuad> boxes)
+        private GridQuad[] FilterOutBadQuads(List<GridQuad> boxes)
         {
             const float MAXAREA = 400f * 300f / 64f;
             const float MINAREA = (400f * 300f / 64f) / 5f;
