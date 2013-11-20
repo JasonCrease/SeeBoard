@@ -51,7 +51,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Board.cs" />
+    <Compile Include="BoardFinder.cs" />
     <Compile Include="Engine.cs" />
     <Compile Include="FFT.cs" />
     <Compile Include="FFT2.cs" />
