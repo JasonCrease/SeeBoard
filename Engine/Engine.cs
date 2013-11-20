@@ -110,16 +110,13 @@ namespace Engine
             // Remove perspective from image
             RemovePerspective(boardLineFinder1.GetBoardRegression());
 
-
-
-
-            // Convert the image to grayscale and filter out the noise
+            // Convert the warped image to grayscale and filter out the noise
             WarpedGrayImage = WarpedImage.Convert<Gray, Byte>().PyrDown().PyrUp();
 
-            // Do canny filter
+            // Do canny filter on warped image
             WarpedCannyImage = WarpedGrayImage.Canny(160.0, 120.0);
 
-            // Do Edge finder
+            // Do Edge finder on warped image
             WarpedLines = WarpedCannyImage.HoughLinesBinary(
                 1, //Distance resolution in pixel-related units
                 Math.PI / 360.0, //Angle resolution measured in radians.
@@ -157,28 +154,30 @@ namespace Engine
 
             List<GridQuad> quads = FindBoardQuads(boardLineFinder2);
             GridQuad[] quadsToChase = FilterOutBadQuads(quads);
-            GridQuad[] quadsToDraw = ChaseThe64Quads(quadsToChase);
+            GridQuad[,] quadsToDraw = ChaseThe64Quads(quadsToChase);
 
-            for (int i = 0; i < quadsToDraw.Length; i++)
-                DrawRectangle(GridBoxesImage, quadsToDraw[i].p, new Bgr(50, 200, 100), 2);
+            for (int i = 0; i < 8; i++)
+                for (int j = 0; j < 8; j++)
+                {
+                    if (quadsToDraw[i, j] != null)
+                        DrawRectangle(GridBoxesImage, quadsToDraw[i, j].p, new Bgr(50, 200, 100), 2);
+                }
 
             DrawRectangle(GridBoxesImage, medianBox.p, new Bgr(220, 150, 100), 3);
-
         }
 
-        private GridQuad[] ChaseThe64Quads(GridQuad[] quadsToChase)
+        private GridQuad[,] ChaseThe64Quads(GridQuad[] quadsToChase)
         {
             List<GridQuad> quadTrain = new List<GridQuad>();
             GridQuad nextQuad = medianBox;
 
             while (true)
             {
-                GridQuad guessBox = EstimateQuadPosition(nextQuad, Dir.E);
+                GridQuad guessBox = EstimateQuadPosition(nextQuad, Dir.W);
                 GridQuad guessQuad = GetSimilarQuad(guessBox, quadsToChase);
 
                 if (guessQuad == null) break;
                 nextQuad = guessQuad;
-                quadTrain.Add(guessQuad);
             }
             while (true)
             {
@@ -187,53 +186,61 @@ namespace Engine
 
                 if (guessQuad == null) break;
                 nextQuad = guessQuad;
-                quadTrain.Add(guessQuad);
             }
-            while (true)
+
+            // We're now at the top right.  We can now iterate right then down to find all the boxes
+
+            GridQuad[,] grid = new GridQuad[8, 8];
+
+            grid[0, 0] = nextQuad;
+
+            for (int row = 0; row < 8; row++)
             {
-                GridQuad guessBox = EstimateQuadPosition(nextQuad, Dir.W);
-                GridQuad guessQuad = GetSimilarQuad(guessBox, quadsToChase);
+                if (row > 0)
+                {
+                    GridQuad guessBox = EstimateQuadPosition(grid[row - 1, 0], Dir.S);
+                    nextQuad = GetSimilarQuad(guessBox, quadsToChase);
+                    if (nextQuad == null) break;
 
-                if (guessQuad == null) break;
-                nextQuad = guessQuad;
-                quadTrain.Add(guessQuad);
-            }
-            while (true)
-            {
-                GridQuad guessBox = EstimateQuadPosition(nextQuad, Dir.S);
-                GridQuad guessQuad = GetSimilarQuad(guessBox, quadsToChase);
+                    grid[row, 0] = nextQuad;
+                }
 
-                if (guessQuad == null) break;
-                nextQuad = guessQuad;
-                quadTrain.Add(guessQuad);
-            }
-            while (true)
-            {
-                GridQuad guessBox = EstimateQuadPosition(nextQuad, Dir.E);
-                GridQuad guessQuad = GetSimilarQuad(guessBox, quadsToChase);
-
-                if (guessQuad == null) break;
-                nextQuad = guessQuad;
-                quadTrain.Add(guessQuad);
+                for (int column = 1; column < 8; column++)
+                {
+                    if (nextQuad == null) break;
+                    GridQuad guessBox = EstimateQuadPosition(nextQuad, Dir.E);
+                    nextQuad = GetSimilarQuad(guessBox, quadsToChase);
+                    grid[row, column] = nextQuad;
+                }
             }
 
-
-            return quadTrain.ToArray();
+            return grid;
         }
 
         private GridQuad GetSimilarQuad(GridQuad quad, GridQuad[] quadsToChase)
         {
-            foreach (GridQuad gq in quadsToChase)
-            {
-                float similarity =
-                    Math.Abs(quad.p[0].X - gq.p[0].X) + Math.Abs(quad.p[0].Y - gq.p[0].Y) +
-                    Math.Abs(quad.p[1].X - gq.p[1].X) + Math.Abs(quad.p[1].Y - gq.p[1].Y) +
-                    Math.Abs(quad.p[2].X - gq.p[2].X) + Math.Abs(quad.p[2].Y - gq.p[2].Y) +
-                    Math.Abs(quad.p[3].X - gq.p[3].X) + Math.Abs(quad.p[3].Y - gq.p[3].Y);
-                if (similarity < 20) return gq;
-            }
+            GridQuad mostSimilarQuad = null;
+            float mostSimilarityValue = 30f;
 
-            return null;
+            foreach(GridQuad testQuad in quadsToChase)
+            {
+                if (QuadSimilatiry(testQuad, quad) < mostSimilarityValue)
+                {
+                    mostSimilarQuad = testQuad;
+                    mostSimilarityValue = QuadSimilatiry(testQuad, quad);
+                }
+            }
+            
+            return mostSimilarQuad;
+        }
+
+        private float QuadSimilatiry(GridQuad x, GridQuad y)
+        {
+            return 
+                    Math.Abs(x.p[0].X - y.p[0].X) + Math.Abs(x.p[0].Y - y.p[0].Y) +
+                    Math.Abs(x.p[1].X - y.p[1].X) + Math.Abs(x.p[1].Y - y.p[1].Y) +
+                    Math.Abs(x.p[2].X - y.p[2].X) + Math.Abs(x.p[2].Y - y.p[2].Y) +
+                    Math.Abs(x.p[3].X - y.p[3].X) + Math.Abs(x.p[3].Y - y.p[3].Y);
         }
 
         private GridQuad EstimateQuadPosition(GridQuad quad, Dir dir)
@@ -320,7 +327,7 @@ namespace Engine
             var bs1 = boxes.Where(x => x.Area < MAXAREA && x.Area > MINAREA).ToArray();
             var bs2 = bs1.Where(x => x.Width < MAXWIDTH && x.Width > MINWIDTH).ToArray();
             var bs3 = bs2.Where(x => x.Height < MAXHEIGHT && x.Height > MINHEIGHT).ToArray();
-            var bs4 = bs3.Where(x => x.Height < x.Width && x.Width < x.Height * 2.5f).ToArray();
+            var bs4 = bs3.Where(x => x.Height < x.Width * 1.5f && x.Width < x.Height * 2.5f).ToArray();
             var bs5 = bs4.OrderBy(x => x.Area).ToArray();
 
             float minDiffToBox64Ago = 99999f;
@@ -337,9 +344,8 @@ namespace Engine
             }
 
             medianBox = bs5[indexAtMinDiff - 32];
-            var bsfinal = bs5.Where(x => x.Area > medianBox.Area - 100f && x.Area < medianBox.Area + 100f &&
-                                         x.Width > medianBox.Width - 4f && x.Width < medianBox.Width + 4f &&
-                                         x.Height > medianBox.Height - 4f && x.Height < medianBox.Height + 4f)
+            var bsfinal = bs5.Where(x => x.Width > medianBox.Width - 5f && x.Width < medianBox.Width + 5f &&
+                                         x.Height > medianBox.Height - 5f && x.Height < medianBox.Height + 5f)
                 .OrderBy(b => b.Area)
                 .ToArray();
 
@@ -425,16 +431,17 @@ namespace Engine
 
         private void RemovePerspective(OLSRegression regression)
         {
-            double B = regression.B;
-            double A = regression.A;
-            double x1 = A * (300 / (B + 300));
-            double x2 = A + ((400 - A) * (B / (B + 300)));
+            float tBit = 300;
+            float B = regression.B;
+            float A = regression.A;
+            float x1 = A * (tBit / (B + tBit));
+            float x2 = A + ((400 - A) * (B / (B + tBit)));
 
             PointF[] srcs = new PointF[4];
             srcs[0] = new PointF((float)x1, 0);
             srcs[1] = new PointF((float)x2, 0);
-            srcs[2] = new PointF(400, 300);
-            srcs[3] = new PointF(0, 300);
+            srcs[2] = new PointF(400, tBit);
+            srcs[3] = new PointF(0, tBit);
 
             PointF[] dsts = new PointF[4];
             dsts[0] = new PointF(0, 0);
