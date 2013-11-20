@@ -9,7 +9,7 @@ namespace Engine
     /// <summary>
     ///  Points must be clockwise from top-left
     /// </summary>
-    public struct GridQuad
+    public class GridQuad
     {
         public float Area
         {
