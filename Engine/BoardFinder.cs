@@ -7,7 +7,7 @@ using System.Drawing;
 
 namespace Engine
 {
-    public class Board
+    public class BoardFinder
     {
         public LineSegment2D[] HorizLines
         {
