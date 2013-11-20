@@ -51,8 +51,8 @@ namespace Engine
                 }
 
                 // Calculate crossing of x-axis (call it c)
-                double m = (double)(p2.X - p1.X) / (double)(p2.Y - p1.Y);
-                double c = (double)p1.X - ((double)p1.Y * m);
+                float m = (float)(p2.X - p1.X) / (float)(p2.Y - p1.Y);
+                float c = (float)p1.X - ((float)p1.Y * m);
 
                 FullLine fullLine = new FullLine(m, c);
                 fullLines.Add(fullLine);
@@ -72,10 +72,10 @@ namespace Engine
 
     internal struct FullLine
     {
-        internal double m;
-        internal double c;
+        internal float m;
+        internal float c;
 
-        internal FullLine(double m, double c)
+        internal FullLine(float m, float c)
         {
             this.m = m;
             this.c = c;
