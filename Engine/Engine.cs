@@ -160,10 +160,10 @@ namespace Engine
                 for (int j = 0; j < 8; j++)
                 {
                     if (quadsToDraw[i, j] != null)
-                        DrawRectangle(GridBoxesImage, quadsToDraw[i, j].p, new Bgr(50, 200, 100), 2);
+                        DrawRectangle(GridBoxesImage, quadsToDraw[i, j].p, new Bgr(220, 150, 10), 1);
                 }
 
-            DrawRectangle(GridBoxesImage, medianBox.p, new Bgr(220, 150, 100), 3);
+            DrawRectangle(GridBoxesImage, medianBox.p, new Bgr(220, 250, 20), 2);
         }
 
         private GridQuad[,] ChaseThe64Quads(GridQuad[] quadsToChase)
@@ -220,7 +220,7 @@ namespace Engine
         private GridQuad GetSimilarQuad(GridQuad quad, GridQuad[] quadsToChase)
         {
             GridQuad mostSimilarQuad = null;
-            float mostSimilarityValue = 30f;
+            float mostSimilarityValue = 40f;
 
             foreach(GridQuad testQuad in quadsToChase)
             {
@@ -327,7 +327,7 @@ namespace Engine
             var bs1 = boxes.Where(x => x.Area < MAXAREA && x.Area > MINAREA).ToArray();
             var bs2 = bs1.Where(x => x.Width < MAXWIDTH && x.Width > MINWIDTH).ToArray();
             var bs3 = bs2.Where(x => x.Height < MAXHEIGHT && x.Height > MINHEIGHT).ToArray();
-            var bs4 = bs3.Where(x => x.Height < x.Width * 1.5f && x.Width < x.Height * 2.5f).ToArray();
+            var bs4 = bs3.Where(x => x.Height < x.Width * 1.5f && x.Width < x.Height * 3f).ToArray();
             var bs5 = bs4.OrderBy(x => x.Area).ToArray();
 
             float minDiffToBox64Ago = 99999f;
