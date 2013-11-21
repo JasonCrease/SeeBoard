@@ -36,14 +36,14 @@ namespace SeeBoard
             engine.BoardImagePath = System.IO.Path.GetFullPath(".\\..\\Images\\Boards\\Board1.jpg");
             engine.Process();
 
-            OrigImage.Source = BitmapSourceConvert.ToBitmapSource(engine.BoardImage);
-            GrayImage.Source = BitmapSourceConvert.ToBitmapSource(engine.GrayImage);
-            CannyImage.Source = BitmapSourceConvert.ToBitmapSource(engine.CannyImage);
-            LinesImage.Source = BitmapSourceConvert.ToBitmapSource(engine.LinesImage);
-            WarpedImage.Source = BitmapSourceConvert.ToBitmapSource(engine.WarpedImage);
-            WarpedCannyImage.Source = BitmapSourceConvert.ToBitmapSource(engine.WarpedCannyImage);
-            WarpedLinesImage.Source = BitmapSourceConvert.ToBitmapSource(engine.WarpedLinesImage);
-            GridBoxesImage.Source = BitmapSourceConvert.ToBitmapSource(engine.GridBoxesImage);
+            OrigImage.Source = BitmapSourceConvert.ToBitmapSource(engine.Board.BoardImage);
+            GrayImage.Source = BitmapSourceConvert.ToBitmapSource(engine.Board.GrayImage);
+            CannyImage.Source = BitmapSourceConvert.ToBitmapSource(engine.Board.CannyImage);
+            LinesImage.Source = BitmapSourceConvert.ToBitmapSource(engine.Board.LinesImage);
+            WarpedImage.Source = BitmapSourceConvert.ToBitmapSource(engine.Board.WarpedImage);
+            WarpedCannyImage.Source = BitmapSourceConvert.ToBitmapSource(engine.Board.WarpedCannyImage);
+            WarpedLinesImage.Source = BitmapSourceConvert.ToBitmapSource(engine.Board.WarpedLinesImage);
+            GridBoxesImage.Source = BitmapSourceConvert.ToBitmapSource(engine.Board.GridBoxesImage);
         }
 
         public static class BitmapSourceConvert

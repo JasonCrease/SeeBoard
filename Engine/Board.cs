@@ -8,37 +8,27 @@ using System.Drawing;
 
 namespace Engine
 {
-    public class Engine
+    public class Board
     {
-        public LombardFFT m_FFT = new LombardFFT();
-
-        public string BoardImagePath
-        {
-            get;
-            set;
-        }
-
         public Image<Bgr, Byte> BoardImage
         {
-            get;private set;
+            get; set;
         }
         public Image<Gray, Byte> GrayImage
         {
-            get;private set;
+            get; private set;
         }
         public Image<Gray, Byte> CannyImage
         {
-            get;private set;
+            get; private set;
         }
         public LineSegment2D[] Lines
         {
-            get;
-            private set;
+            get; private set;
         }
         public Image<Bgr, Byte> LinesImage
         {
-            get;
-            private set;
+            get; private set;
         }
 
         public Image<Bgr, byte> WarpedImage
@@ -67,17 +57,8 @@ namespace Engine
             private set;
         }
 
-
-        public Engine()
+        public void FindBoard()
         {
-
-        }
-
-        public void Process()
-        {
-            // Build original image, downscaled slightly
-            BoardImage = new Image<Bgr, byte>(BoardImagePath).Resize(400, 300, Emgu.CV.CvEnum.INTER.CV_INTER_CUBIC, true);
-
             // Convert the image to grayscale and filter out the noise
             GrayImage = BoardImage.Convert<Gray, Byte>().PyrDown().PyrUp();
 
