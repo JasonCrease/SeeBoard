@@ -22,7 +22,7 @@ namespace Engine
 
         internal void BuildLineSets(LineSegment2D[] lines, double vertTol, double horizTol)
         {
-            const double MINLENGTH = 30.0;
+            const double MINLENGTH = 20.0;
             //const double ANGLETOLHORIZ = ; //;
             //const double ANGLETOLVERT = ;  // Math.PI / 10.0;
 
