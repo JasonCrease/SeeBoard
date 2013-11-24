@@ -32,9 +32,15 @@ namespace SeeBoard
 
         private void ButtonGo_Click(object sender, RoutedEventArgs e)
         {
-            Engine.Engine engine = new Engine.Engine(); 
-            engine.BoardImagePath = System.IO.Path.GetFullPath(".\\..\\Images\\EmptyBoards\\Board9.jpg");
+            System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+            sw.Start();
+
+            Engine.Engine engine = new Engine.Engine();
+            engine.BoardImagePath = System.IO.Path.GetFullPath(".\\..\\Images\\EmptyBoards\\Board2.jpg");
             engine.Process();
+
+            sw.Stop();
+            TextBlockTimeTaken.Text = sw.ElapsedMilliseconds.ToString() + "ms";
 
             OrigImage.Source = BitmapSourceConvert.ToBitmapSource(engine.Board.BoardImage);
             GrayImage.Source = BitmapSourceConvert.ToBitmapSource(engine.Board.GrayImage);

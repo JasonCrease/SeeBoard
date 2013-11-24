@@ -17,6 +17,7 @@
             <ColumnDefinition Width="405"/>
         </Grid.ColumnDefinitions>
         <Button x:Name="ButtonGo" Width="150" Height="20" Grid.Row ="0" Grid.Column="0" Content="Go" Click="ButtonGo_Click" />
+        <TextBlock x:Name="TextBlockTimeTaken" Width="100" Height="20" Grid.Row="0" Grid.Column="1"/>
         <Image x:Name="OrigImage" Width="400" Height="300" Grid.Row ="1" Grid.Column="0"/>
         <Image x:Name="GrayImage" Width="400" Height="300" Grid.Row ="1" Grid.Column="1"/>
         <Image x:Name="CannyImage" Width="400" Height="300" Grid.Row ="1" Grid.Column="2"/>
