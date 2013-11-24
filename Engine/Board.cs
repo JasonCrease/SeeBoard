@@ -338,9 +338,11 @@ namespace Engine
                 }
             }
 
+            float dimMaxError = 5f;
+
             medianBox = bs5[indexAtMinDiff - 32];
-            var bsfinal = bs5.Where(x => x.Width > medianBox.Width - 5f && x.Width < medianBox.Width + 5f &&
-                                         x.Height > medianBox.Height - 5f && x.Height < medianBox.Height + 5f)
+            var bsfinal = bs5.Where(x => x.Width > medianBox.Width - dimMaxError && x.Width < medianBox.Width + dimMaxError &&
+                                         x.Height > medianBox.Height - dimMaxError && x.Height < medianBox.Height + dimMaxError)
                 .OrderBy(b => b.Area)
                 .ToArray();
 
