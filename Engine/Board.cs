@@ -56,6 +56,11 @@ namespace Engine
             get;
             private set;
         }
+        public Image<Bgr, Byte> BoardImageWithBoxes
+        {
+            get;
+            private set;
+        }
 
         public void FindBoard()
         {
@@ -70,13 +75,13 @@ namespace Engine
                 1, //Distance resolution in pixel-related units
                 Math.PI / 360.0, //Angle resolution measured in radians.
                 50, //threshold
-                20, //min Line width
+                30, //min Line width
                 20 //gap between lines
                 )[0]; //Get the lines from the first channel
 
             // Find board
             BoardFinder boardLineFinder1 = new BoardFinder();
-            boardLineFinder1.BuildLineSets(Lines, Math.PI / 10.0, Math.PI / 50.0);
+            boardLineFinder1.BuildLineSets(Lines, Math.PI / 10.0, Math.PI / 40.0);
 
             // Make lines image
             Image<Bgr, Byte> linesImage = BoardImage.CopyBlank();
@@ -95,20 +100,20 @@ namespace Engine
             WarpedGrayImage = WarpedImage.Convert<Gray, Byte>().PyrDown().PyrUp();
 
             // Do canny filter on warped image
-            WarpedCannyImage = WarpedGrayImage.Canny(160.0, 120.0);
+            WarpedCannyImage = WarpedGrayImage.Canny(160, 90);
 
             // Do Edge finder on warped image
             WarpedLines = WarpedCannyImage.HoughLinesBinary(
                 1, //Distance resolution in pixel-related units
-                Math.PI / 360.0, //Angle resolution measured in radians.
+                Math.PI / 360, //Angle resolution measured in radians.
                 50, //threshold
                 20, //min Line width
-                80 //gap between lines
+                40 //gap between lines
                 )[0]; //Get the lines from the first channel
 
             // Find board
             BoardFinder boardLineFinder2 = new BoardFinder();
-            boardLineFinder2.BuildLineSets(WarpedLines, Math.PI / 160.0, Math.PI / 160.0);
+            boardLineFinder2.BuildLineSets(WarpedLines, Math.PI / 100.0, Math.PI / 100.0);
 
             // Make lines image
             Image<Bgr, Byte> warpedLinesImage = WarpedImage.CopyBlank();
@@ -129,23 +134,46 @@ namespace Engine
             WarpedLinesImage = warpedLinesImage;
 
             GridQuadsImage = WarpedImage.Copy();
+            BoardImageWithBoxes = BoardImage.Copy();
+
+            try
+            {
+                // Find grid quads
+
+                List<GridQuad> quads = FindBoardQuads(boardLineFinder2);
+                GridQuad[] quadsToChase = FilterOutBadQuads(quads);
+                GridQuad[,] quadsToDraw = ChaseThe64Quads(quadsToChase);
+
+                for (int i = 0; i < 8; i++)
+                    for (int j = 0; j < 8; j++)
+                    {
+                        if (quadsToDraw[i, j] != null)
+                            DrawRectangle(GridQuadsImage, quadsToDraw[i, j].p, new Bgr(120, 190, 20), 2);
+                    }
+
+                DrawRectangle(GridQuadsImage, medianBox.p, new Bgr(220, 250, 20), 2);
+
+                // Set up return array
 
 
-            // Find grid quads
+                Quads = new GridQuad[8, 8];
 
-            List<GridQuad> quads = FindBoardQuads(boardLineFinder2);
-            GridQuad[] quadsToChase = FilterOutBadQuads(quads);
-            GridQuad[,] quadsToDraw = ChaseThe64Quads(quadsToChase);
+                for (int i = 0; i < 8; i++)
+                    for (int j = 0; j < 8; j++)
+                    {
+                        if (quadsToDraw[i, j] != null)
+                        {
+                            Quads[i, j] = new GridQuad(quadsToDraw[i, j].p);
+                            m_InverseWarpMatrix.ProjectPoints(Quads[i, j].p);
+                            DrawRectangle(BoardImageWithBoxes, Quads[i, j].p, new Bgr(120, 190, 20), 2);
+                        }
+                    }
 
-            for (int i = 0; i < 8; i++)
-                for (int j = 0; j < 8; j++)
-                {
-                    if (quadsToDraw[i, j] != null)
-                        DrawRectangle(GridQuadsImage, quadsToDraw[i, j].p, new Bgr(i * 20, 190, j * 20), 2);
-                }
-
-            DrawRectangle(GridQuadsImage, medianBox.p, new Bgr(220, 250, 20), 2);
+            }
+            catch { }
         }
+
+        public GridQuad[,] Quads { get; private set; }
 
         private GridQuad[,] ChaseThe64Quads(GridQuad[] quadsToChase)
         {
@@ -206,7 +234,7 @@ namespace Engine
         private GridQuad GetMostSimilarQuad(GridQuad quad, GridQuad[] quadsToChase)
         {
             GridQuad mostSimilarQuad = null;
-            float mostSimilarityValue = 40f;
+            float mostSimilarityValue = 20f;
 
             foreach(GridQuad testQuad in quadsToChase)
             {
@@ -311,15 +339,15 @@ namespace Engine
             const float MINAREA = (400f * 300f / 64f) / 5f;
 
             const float MAXWIDTH = 400f / 8f;
-            const float MINWIDTH = (400f / 8f) / 2f;
+            const float MINWIDTH = (400f / 8f) / 1.7f;
 
             const float MAXHEIGHT = 300f / 8f;
-            const float MINHEIGHT = (300f / 8f) / 2.5f;
+            const float MINHEIGHT = (300f / 8f) / 3f;
 
             var bs1 = quads.Where(x => x.Area < MAXAREA && x.Area > MINAREA);
             var bs2 = bs1.Where(x => x.Width < MAXWIDTH && x.Width > MINWIDTH);
             var bs3 = bs2.Where(x => x.Height < MAXHEIGHT && x.Height > MINHEIGHT);
-            var bs4 = bs3.Where(x => x.Height < x.Width * 1.2f && x.Width < x.Height * 3f);
+            var bs4 = bs3.Where(x => x.Height < x.Width * 1.7f && x.Width < x.Height * 3f);
             var bs5 = bs4.OrderBy(x => x.Area).ToArray();
 
             float minDiffToBox64Ago = 99999f;
@@ -338,11 +366,12 @@ namespace Engine
                 }
             }
 
-            float dimMaxError = 5f;
+            float widthMaxError = 6f;
+            float heightMaxError = 5f;
 
             medianBox = bs5[indexAtMinDiff - 32];
-            var bsfinal = bs5.Where(x => x.Width > medianBox.Width - dimMaxError && x.Width < medianBox.Width + dimMaxError &&
-                                         x.Height > medianBox.Height - dimMaxError && x.Height < medianBox.Height + dimMaxError)
+            var bsfinal = bs5.Where(x => x.Width > medianBox.Width - widthMaxError && x.Width < medianBox.Width + widthMaxError &&
+                                         x.Height > medianBox.Height - heightMaxError && x.Height < medianBox.Height + heightMaxError)
                 .OrderBy(b => b.Area)
                 .ToArray();
 
@@ -446,12 +475,20 @@ namespace Engine
             dsts[2] = new PointF(400, 300);
             dsts[3] = new PointF(0, 300);
 
-            HomographyMatrix mywarpmat = CameraCalibration.GetPerspectiveTransform(srcs, dsts);
-            WarpedImage = BoardImage.WarpPerspective(mywarpmat, 400, 300,
+            HomographyMatrix warpMat = CameraCalibration.GetPerspectiveTransform(srcs, dsts);
+            WarpedImage = BoardImage.WarpPerspective(warpMat, 400, 300,
                 Emgu.CV.CvEnum.INTER.CV_INTER_CUBIC,
                 Emgu.CV.CvEnum.WARP.CV_WARP_FILL_OUTLIERS,
                 GetBottomBorderColor(BoardImage));
+
+            m_InverseWarpMatrix = CameraCalibration.GetPerspectiveTransform(dsts, srcs);
+            //WarpedImage = WarpedImage.WarpPerspective(m_InverseWarpMatrix, 400, 300,
+            //    Emgu.CV.CvEnum.INTER.CV_INTER_CUBIC,
+            //    Emgu.CV.CvEnum.WARP.CV_WARP_FILL_OUTLIERS,
+            //    GetBottomBorderColor(BoardImage));
         }
+
+        private HomographyMatrix m_InverseWarpMatrix;
 
         private Bgr GetBottomBorderColor(Image<Bgr, byte> image )
         {
