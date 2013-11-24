@@ -19,9 +19,10 @@
         <Button x:Name="ButtonGo" Width="150" Height="20" Grid.Row ="0" Grid.Column="0" Content="Go" Click="ButtonGo_Click" />
         <TextBlock x:Name="TextBlockTimeTaken" Width="100" Height="20" Grid.Row="0" Grid.Column="1"/>
         <Image x:Name="OrigImage" Width="400" Height="300" Grid.Row ="1" Grid.Column="0"/>
-        <Image x:Name="GrayImage" Width="400" Height="300" Grid.Row ="1" Grid.Column="1"/>
+        <Image x:Name="OrigImageWithQuads" Width="400" Height="300" Grid.Row ="1" Grid.Column="1"/>
+        <!--<Image x:Name="GrayImage" Width="400" Height="300" Grid.Row ="1" Grid.Column="1"/>
         <Image x:Name="CannyImage" Width="400" Height="300" Grid.Row ="1" Grid.Column="2"/>
-        <Image x:Name="LinesImage" Width="400" Height="300" Grid.Row ="1" Grid.Column="3"/>
+        <Image x:Name="LinesImage" Width="400" Height="300" Grid.Row ="1" Grid.Column="3"/>-->
         <Image x:Name="WarpedImage" Width="400" Height="300" Grid.Row ="2" Grid.Column="0"/>
         <Image x:Name="WarpedCannyImage" Width="400" Height="300" Grid.Row ="2" Grid.Column="1"/>
         <Image x:Name="WarpedLinesImage" Width="400" Height="300" Grid.Row ="2" Grid.Column="2"/>

@@ -27,7 +27,7 @@ namespace SeeBoard
 
             InitializeComponent();
 
-            //ButtonGo_Click(this, null);
+            ButtonGo_Click(this, null);
         }
 
         private void ButtonGo_Click(object sender, RoutedEventArgs e)
@@ -36,16 +36,17 @@ namespace SeeBoard
             sw.Start();
 
             Engine.Engine engine = new Engine.Engine();
-            engine.BoardImagePath = System.IO.Path.GetFullPath(".\\..\\Images\\EmptyBoards\\Board2.jpg");
+            engine.BoardImagePath = System.IO.Path.GetFullPath(".\\..\\Images\\Boards\\Board7.jpg");
             engine.Process();
 
             sw.Stop();
             TextBlockTimeTaken.Text = sw.ElapsedMilliseconds.ToString() + "ms";
 
             OrigImage.Source = BitmapSourceConvert.ToBitmapSource(engine.Board.BoardImage);
-            GrayImage.Source = BitmapSourceConvert.ToBitmapSource(engine.Board.GrayImage);
-            CannyImage.Source = BitmapSourceConvert.ToBitmapSource(engine.Board.CannyImage);
-            LinesImage.Source = BitmapSourceConvert.ToBitmapSource(engine.Board.LinesImage);
+            OrigImageWithQuads.Source = BitmapSourceConvert.ToBitmapSource(engine.Board.BoardImageWithBoxes);
+            //GrayImage.Source = BitmapSourceConvert.ToBitmapSource(engine.Board.GrayImage);
+            //CannyImage.Source = BitmapSourceConvert.ToBitmapSource(engine.Board.CannyImage);
+            //LinesImage.Source = BitmapSourceConvert.ToBitmapSource(engine.Board.LinesImage);
             WarpedImage.Source = BitmapSourceConvert.ToBitmapSource(engine.Board.WarpedImage);
             WarpedCannyImage.Source = BitmapSourceConvert.ToBitmapSource(engine.Board.WarpedCannyImage);
             WarpedLinesImage.Source = BitmapSourceConvert.ToBitmapSource(engine.Board.WarpedLinesImage);
