@@ -51,7 +51,7 @@ namespace Engine
         {
             get; private set;
         }
-        public Image<Bgr, Byte> GridBoxesImage
+        public Image<Bgr, Byte> GridQuadsImage
         {
             get;
             private set;
@@ -128,7 +128,7 @@ namespace Engine
             }
             WarpedLinesImage = warpedLinesImage;
 
-            GridBoxesImage = WarpedImage.Copy();
+            GridQuadsImage = WarpedImage.Copy();
 
 
             // Find grid quads
@@ -141,10 +141,10 @@ namespace Engine
                 for (int j = 0; j < 8; j++)
                 {
                     if (quadsToDraw[i, j] != null)
-                        DrawRectangle(GridBoxesImage, quadsToDraw[i, j].p, new Bgr(220, 150, 10), 1);
+                        DrawRectangle(GridQuadsImage, quadsToDraw[i, j].p, new Bgr(i * 20, 190, j * 20), 2);
                 }
 
-            DrawRectangle(GridBoxesImage, medianBox.p, new Bgr(220, 250, 20), 2);
+            DrawRectangle(GridQuadsImage, medianBox.p, new Bgr(220, 250, 20), 2);
         }
 
         private GridQuad[,] ChaseThe64Quads(GridQuad[] quadsToChase)
@@ -152,10 +152,12 @@ namespace Engine
             List<GridQuad> quadTrain = new List<GridQuad>();
             GridQuad nextQuad = medianBox;
 
+            // Go to the top right through the quads
+
             while (true)
             {
                 GridQuad guessBox = EstimateQuadPosition(nextQuad, Dir.W);
-                GridQuad guessQuad = GetSimilarQuad(guessBox, quadsToChase);
+                GridQuad guessQuad = GetMostSimilarQuad(guessBox, quadsToChase);
 
                 if (guessQuad == null) break;
                 nextQuad = guessQuad;
@@ -163,13 +165,13 @@ namespace Engine
             while (true)
             {
                 GridQuad guessBox = EstimateQuadPosition(nextQuad, Dir.N);
-                GridQuad guessQuad = GetSimilarQuad(guessBox, quadsToChase);
+                GridQuad guessQuad = GetMostSimilarQuad(guessBox, quadsToChase);
 
                 if (guessQuad == null) break;
                 nextQuad = guessQuad;
             }
 
-            // We're now at the top right.  We can now iterate right then down to find all the boxes
+            // We're now at the top right.  We can now iterate across the 8x8 grid to find all the 64 quads
 
             GridQuad[,] grid = new GridQuad[8, 8];
 
@@ -180,7 +182,7 @@ namespace Engine
                 if (row > 0)
                 {
                     GridQuad guessBox = EstimateQuadPosition(grid[row - 1, 0], Dir.S);
-                    nextQuad = GetSimilarQuad(guessBox, quadsToChase);
+                    nextQuad = GetMostSimilarQuad(guessBox, quadsToChase);
                     if (nextQuad == null) break;
 
                     grid[row, 0] = nextQuad;
@@ -190,7 +192,7 @@ namespace Engine
                 {
                     if (nextQuad == null) break;
                     GridQuad guessBox = EstimateQuadPosition(nextQuad, Dir.E);
-                    nextQuad = GetSimilarQuad(guessBox, quadsToChase);
+                    nextQuad = GetMostSimilarQuad(guessBox, quadsToChase);
                     grid[row, column] = nextQuad;
                 }
             }
@@ -198,24 +200,30 @@ namespace Engine
             return grid;
         }
 
-        private GridQuad GetSimilarQuad(GridQuad quad, GridQuad[] quadsToChase)
+        /// <summary>
+        /// Find the quad most similar to quad, or null if no similar quads are found
+        /// </summary>
+        private GridQuad GetMostSimilarQuad(GridQuad quad, GridQuad[] quadsToChase)
         {
             GridQuad mostSimilarQuad = null;
             float mostSimilarityValue = 40f;
 
             foreach(GridQuad testQuad in quadsToChase)
             {
-                if (QuadSimilatiry(testQuad, quad) < mostSimilarityValue)
+                if (QuadTotalSquaredError(testQuad, quad) < mostSimilarityValue)
                 {
                     mostSimilarQuad = testQuad;
-                    mostSimilarityValue = QuadSimilatiry(testQuad, quad);
+                    mostSimilarityValue = QuadTotalSquaredError(testQuad, quad);
                 }
             }
             
             return mostSimilarQuad;
         }
 
-        private float QuadSimilatiry(GridQuad x, GridQuad y)
+        /// <summary>
+        ///  Find total squared error between quads
+        /// </summary>
+        private float QuadTotalSquaredError(GridQuad x, GridQuad y)
         {
             return 
                     Math.Abs(x.p[0].X - y.p[0].X) + Math.Abs(x.p[0].Y - y.p[0].Y) +
@@ -224,6 +232,9 @@ namespace Engine
                     Math.Abs(x.p[3].X - y.p[3].X) + Math.Abs(x.p[3].Y - y.p[3].Y);
         }
 
+        /// <summary>
+        /// Returns a quad the same as quad but proportionally in direction dir.
+        /// </summary>
         private GridQuad EstimateQuadPosition(GridQuad quad, Dir dir)
         {
             PointF p0 = new PointF(quad.p[0].X, quad.p[0].Y);
@@ -268,7 +279,7 @@ namespace Engine
 
         private List<GridQuad> FindBoardQuads(BoardFinder boardLineFinder)
         {
-            List<GridQuad> boxes = new List<GridQuad>();
+            List<GridQuad> quads = new List<GridQuad>();
 
             for (int hi1 = 0; hi1 < boardLineFinder.HorizLines.Length - 1; hi1++)
                 for (int hi2 = hi1 + 1; hi2 < boardLineFinder.HorizLines.Length; hi2++)
@@ -286,15 +297,15 @@ namespace Engine
 
                             if (points != null)
                             {
-                                boxes.Add(new GridQuad(points));
+                                quads.Add(new GridQuad(points));
                             }
                         }
                 }
 
-            return boxes;
+            return quads;
         }
 
-        private GridQuad[] FilterOutBadQuads(List<GridQuad> boxes)
+        private GridQuad[] FilterOutBadQuads(List<GridQuad> quads)
         {
             const float MAXAREA = 400f * 300f / 64f;
             const float MINAREA = (400f * 300f / 64f) / 5f;
@@ -305,16 +316,19 @@ namespace Engine
             const float MAXHEIGHT = 300f / 8f;
             const float MINHEIGHT = (300f / 8f) / 2.5f;
 
-            var bs1 = boxes.Where(x => x.Area < MAXAREA && x.Area > MINAREA).ToArray();
-            var bs2 = bs1.Where(x => x.Width < MAXWIDTH && x.Width > MINWIDTH).ToArray();
-            var bs3 = bs2.Where(x => x.Height < MAXHEIGHT && x.Height > MINHEIGHT).ToArray();
-            var bs4 = bs3.Where(x => x.Height < x.Width * 1.5f && x.Width < x.Height * 3f).ToArray();
+            var bs1 = quads.Where(x => x.Area < MAXAREA && x.Area > MINAREA);
+            var bs2 = bs1.Where(x => x.Width < MAXWIDTH && x.Width > MINWIDTH);
+            var bs3 = bs2.Where(x => x.Height < MAXHEIGHT && x.Height > MINHEIGHT);
+            var bs4 = bs3.Where(x => x.Height < x.Width * 1.2f && x.Width < x.Height * 3f);
             var bs5 = bs4.OrderBy(x => x.Area).ToArray();
 
             float minDiffToBox64Ago = 99999f;
             int indexAtMinDiff = 999;
 
-            for (int i = 64; i < bs4.Length; i++)
+            if(bs5.Length <= 64) throw new ApplicationException(
+                string.Format("Found {0} quads, of which only {1} are plausible.", bs1.Count(), bs5.Length));
+
+            for (int i = 64; i < bs5.Length; i++)
             {
                 float diffToBox64Ago = bs5[i].Area - bs5[i - 64].Area;
                 if (diffToBox64Ago < minDiffToBox64Ago)
