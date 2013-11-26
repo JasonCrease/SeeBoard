@@ -36,7 +36,7 @@ namespace SeeBoard
             sw.Start();
 
             Engine.Engine engine = new Engine.Engine();
-            engine.BoardImagePath = System.IO.Path.GetFullPath(".\\..\\Images\\Boards\\Board7.jpg");
+            engine.BoardImagePath = System.IO.Path.GetFullPath(".\\..\\Images\\MyBoards\\Board05.jpg");
             engine.Process();
 
             sw.Stop();
