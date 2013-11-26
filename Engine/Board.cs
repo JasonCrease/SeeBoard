@@ -43,9 +43,14 @@ namespace Engine
         {
             get; private set;
         }
-        public LineSegment2D[] WarpedLines
+        public LineSegment2D[] WarpedHorizLines
         {
             get; private set;
+        }
+        public LineSegment2D[] WarpedVertLines
+        {
+            get;
+            private set;
         }
         public Image<Bgr, Byte> WarpedLinesImage
         {
@@ -81,7 +86,7 @@ namespace Engine
 
             // Find board
             BoardFinder boardLineFinder1 = new BoardFinder();
-            boardLineFinder1.BuildLineSets(Lines, Math.PI / 10.0, Math.PI / 40.0);
+            boardLineFinder1.BuildLineSets(Lines, Lines, Math.PI / 10.0, Math.PI / 40.0);
 
             // Make lines image
             Image<Bgr, Byte> linesImage = BoardImage.CopyBlank();
@@ -103,24 +108,31 @@ namespace Engine
             WarpedCannyImage = WarpedGrayImage.Canny(160, 90);
 
             // Do Edge finder on warped image
-            WarpedLines = WarpedCannyImage.HoughLinesBinary(
+            WarpedVertLines = WarpedCannyImage.HoughLinesBinary(
                 1, //Distance resolution in pixel-related units
                 Math.PI / 360, //Angle resolution measured in radians.
-                50, //threshold
-                20, //min Line width
+                30, //threshold
+                40, //min Line width
+                20 //gap between lines
+                )[0]; //Get the lines from the first channel
+            WarpedHorizLines = WarpedCannyImage.HoughLinesBinary(
+                1, //Distance resolution in pixel-related units
+                Math.PI / 360, //Angle resolution measured in radians.
+                60, //threshold
+                70, //min Line width
                 40 //gap between lines
                 )[0]; //Get the lines from the first channel
 
             // Find board
             BoardFinder boardLineFinder2 = new BoardFinder();
-            boardLineFinder2.BuildLineSets(WarpedLines, Math.PI / 100.0, Math.PI / 100.0);
+            boardLineFinder2.BuildLineSets(WarpedVertLines, WarpedHorizLines, Math.PI / 60.0, Math.PI / 60.0);
 
             // Make lines image
             Image<Bgr, Byte> warpedLinesImage = WarpedImage.CopyBlank();
             Image<Gray, Byte> warpedGridLinesImage = WarpedGrayImage.CopyBlank();
 
-            foreach (LineSegment2D line in WarpedLines)
-                warpedLinesImage.Draw(line, new Bgr(System.Drawing.Color.Gray), 1);
+            //foreach (LineSegment2D line in WarpedVertLines.Union(WarpedHorizLines))
+            //    warpedLinesImage.Draw(line, new Bgr(System.Drawing.Color.Gray), 1);
             foreach (LineSegment2D line in boardLineFinder2.HorizLines)
             {
                 warpedGridLinesImage.Draw(line, new Gray(100), 1);
