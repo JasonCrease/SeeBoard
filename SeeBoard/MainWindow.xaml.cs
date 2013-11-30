@@ -22,8 +22,8 @@ namespace SeeBoard
     {
         public MainWindow()
         {
-            this.Left = 1550;
-            this.Top = 30;
+            this.Left = 0;
+            this.Top = 0;
 
             InitializeComponent();
 
@@ -36,7 +36,7 @@ namespace SeeBoard
             sw.Start();
 
             Engine.Engine engine = new Engine.Engine();
-            engine.BoardImagePath = System.IO.Path.GetFullPath(".\\..\\Images\\MyBoards\\Board05.jpg");
+            engine.BoardImagePath = System.IO.Path.GetFullPath(".\\..\\Images\\Boards\\Board1.jpg");
             engine.Process();
 
             sw.Stop();
@@ -44,6 +44,7 @@ namespace SeeBoard
 
             OrigImage.Source = BitmapSourceConvert.ToBitmapSource(engine.Board.BoardImage);
             OrigImageWithQuads.Source = BitmapSourceConvert.ToBitmapSource(engine.Board.BoardImageWithBoxes);
+            PieceImage.Source = BitmapSourceConvert.ToBitmapSource(engine.PieceFinder.PieceImages[6, 2]);
             //GrayImage.Source = BitmapSourceConvert.ToBitmapSource(engine.Board.GrayImage);
             //CannyImage.Source = BitmapSourceConvert.ToBitmapSource(engine.Board.CannyImage);
             //LinesImage.Source = BitmapSourceConvert.ToBitmapSource(engine.Board.LinesImage);
@@ -74,6 +75,16 @@ namespace SeeBoard
                     return bs;
                 }
             }
+        }
+
+        private void ButtonNext_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void ButtonPrev_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

@@ -18,6 +18,14 @@ namespace Engine
             }
         }
 
+        public PieceFinder PieceFinder
+        {
+            get
+            {
+                return m_PieceFinder;
+            }
+        }
+
         public string BoardImagePath
         {
             get;
@@ -25,6 +33,7 @@ namespace Engine
         }
 
         Board m_Board;
+        private PieceFinder m_PieceFinder;
 
         public Engine()
         {
@@ -35,9 +44,13 @@ namespace Engine
             m_Board = new Board();
 
             // Build original image, downscaled slightly
-            m_Board.BoardImage = new Image<Bgr, byte>(BoardImagePath).Resize(400, 300, Emgu.CV.CvEnum.INTER.CV_INTER_CUBIC, true);
-
+            var boardImage = new Image<Bgr, byte>(BoardImagePath).Resize(400, 300, Emgu.CV.CvEnum.INTER.CV_INTER_CUBIC, true);
+            m_Board.BoardImage = boardImage;
             m_Board.FindBoard();
+
+            m_PieceFinder = new PieceFinder(boardImage, m_Board.Quads);
+            m_PieceFinder.GoFind();
+        
         }
 
     }
