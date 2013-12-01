@@ -22,7 +22,7 @@
         <Button x:Name="ButtonPrev" Width="80" Height="20" Margin="-100,0,0,0" Grid.Row ="0" Grid.Column="2" Content="Prev" Click="ButtonPrev_Click" RenderTransformOrigin="0.697,0.617" />
         <Image x:Name="OrigImage" Width="400" Height="300" Grid.Row ="1" Grid.Column="0"/>
         <Image x:Name="OrigImageWithQuads" Width="400" Height="300" Grid.Row ="1" Grid.Column="1"/>
-        <Image x:Name="PieceImage" Width="64" Height="64" Grid.Row ="1" Grid.Column="2"/>
+        <Image x:Name="PieceImage" Width="64" Height="128" Grid.Row ="1" Grid.Column="2"/>
         <!--<Image x:Name="GrayImage" Width="400" Height="300" Grid.Row ="1" Grid.Column="1"/>
         <Image x:Name="CannyImage" Width="400" Height="300" Grid.Row ="1" Grid.Column="2"/>
         <Image x:Name="LinesImage" Width="400" Height="300" Grid.Row ="1" Grid.Column="3"/>-->
