@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Drawing;
 
-namespace Engine
+namespace Engine.Board
 {
     /// <summary>
     ///  Points must be clockwise from top-left

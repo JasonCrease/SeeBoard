@@ -11,7 +11,7 @@ namespace Engine
     public class PieceFinder
     {
         Image<Bgr, byte> m_Image;
-        GridQuad[,] m_Grid;
+        Board.GridQuad[,] m_Grid;
         Image<Bgr, byte>[,] m_PieceImages = new Image<Bgr, byte>[8, 8];
 
         public Image<Bgr, byte>[,] PieceImages
@@ -22,7 +22,7 @@ namespace Engine
             }
         }
 
-        public PieceFinder(Image<Bgr, byte> image, GridQuad[,] grid)
+        public PieceFinder(Image<Bgr, byte> image, Board.GridQuad[,] grid)
         {
             m_Image = image;
             m_Grid = grid;
@@ -39,7 +39,7 @@ namespace Engine
 
         private void FindPiece(int x, int y)
         {
-            GridQuad quad = m_Grid[x, y];
+            Board.GridQuad quad = m_Grid[x, y];
             float topSkew = ((quad.p[0].X + quad.p[1].X) - (quad.p[2].X + quad.p[3].X));
 
             PointF[] srcs = new PointF[4];

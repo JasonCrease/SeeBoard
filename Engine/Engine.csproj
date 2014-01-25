@@ -51,15 +51,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Board.cs" />
-    <Compile Include="BoardLineFinder.cs" />
+    <Compile Include="Board\BoardLineFinder.cs" />
+    <Compile Include="Board\Board.cs" />
     <Compile Include="Engine.cs" />
-    <Compile Include="GridBox.cs" />
-    <Compile Include="OLSRegression.cs" />
+    <Compile Include="Board\GridBox.cs" />
+    <Compile Include="Board\OLSRegression.cs" />
     <Compile Include="PieceFinder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Piece\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

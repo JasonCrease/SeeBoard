@@ -6,7 +6,7 @@ using Emgu.CV;
 using Emgu.CV.Structure;
 using System.Drawing;
 
-namespace Engine
+namespace Engine.Board
 {
     public class Board
     {

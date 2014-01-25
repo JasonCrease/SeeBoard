@@ -10,7 +10,7 @@ namespace Engine
 {
     public class Engine
     {
-        public Board Board
+        public Board.Board Board
         {
             get
             {
@@ -32,7 +32,7 @@ namespace Engine
             set;
         }
 
-        Board m_Board;
+        Board.Board m_Board;
         private PieceFinder m_PieceFinder;
 
         public Engine()
@@ -41,7 +41,7 @@ namespace Engine
 
         public void Process()
         {
-            m_Board = new Board();
+            m_Board = new Board.Board();
 
             // Build original image, downscaled slightly
             var boardImage = new Image<Bgr, byte>(BoardImagePath).Resize(400, 300, Emgu.CV.CvEnum.INTER.CV_INTER_CUBIC, true);
