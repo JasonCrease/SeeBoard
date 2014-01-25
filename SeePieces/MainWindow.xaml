@@ -5,13 +5,17 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="20" />
-            <RowDefinition Height="300" />
+            <RowDefinition Height="400" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="405"/>
-            <ColumnDefinition Width="405"/>
+            <ColumnDefinition Width="205"/>
+            <ColumnDefinition Width="205"/>
+            <ColumnDefinition Width="205"/>
         </Grid.ColumnDefinitions>
-        <Image x:Name="OrigImage" Width="400" Height="300" Grid.Row ="1" Grid.Column="0"/>
+        <Button Grid.Row ="0" Grid.Column="0" Name="ButtonGo" Click="ButtonGo_Click" />
+        <Image x:Name="PieceImage" Width="200" Height="400" Grid.Row ="1" Grid.Column="0"/>
+        <Image x:Name="GrayImage" Width="200" Height="400" Grid.Row ="1" Grid.Column="1"/>
+        <Image x:Name="CannyImage" Width="200" Height="400" Grid.Row ="1" Grid.Column="2"/>
     </Grid>
 </Window>
