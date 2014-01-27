@@ -1,34 +1,34 @@
 ﻿<Window x:Class="SeeBoard.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="SeeBoard" Height="950" Width="1700">
+        Title="SeeBoard" Height="550" Width="1000" Left="50" Top="50">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="20" />
-            <RowDefinition Height="300" />
-            <RowDefinition Height="300" />
-            <RowDefinition Height="300" />
+            <RowDefinition Height="200" />
+            <RowDefinition Height="200" />
+            <RowDefinition Height="200" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="405"/>
-            <ColumnDefinition Width="405"/>
-            <ColumnDefinition Width="405"/>
-            <ColumnDefinition Width="405"/>
+            <ColumnDefinition Width="205"/>
+            <ColumnDefinition Width="205"/>
+            <ColumnDefinition Width="205"/>
+            <ColumnDefinition Width="205"/>
         </Grid.ColumnDefinitions>
         <Button x:Name="ButtonGo" Width="150" Height="20" Grid.Row ="0" Grid.Column="0" Content="Go" Click="ButtonGo_Click" />
         <TextBlock x:Name="TextBlockTimeTaken" Width="100" Height="20" Grid.Row="0" Grid.Column="1"/>
         <Button x:Name="ButtonNext" Width="80" Height="20" Margin="100,0,0,0" Grid.Row ="0" Grid.Column="2" Content="Next" Click="ButtonNext_Click" />
         <Button x:Name="ButtonPrev" Width="80" Height="20" Margin="-100,0,0,0" Grid.Row ="0" Grid.Column="2" Content="Prev" Click="ButtonPrev_Click" RenderTransformOrigin="0.697,0.617" />
-        <Image x:Name="OrigImage" Width="400" Height="300" Grid.Row ="1" Grid.Column="0"/>
-        <Image x:Name="OrigImageWithQuads" Width="400" Height="300" Grid.Row ="1" Grid.Column="1"/>
+        <Image x:Name="OrigImage" Width="200" Height="300" Grid.Row ="1" Grid.Column="0"/>
+        <Image x:Name="OrigImageWithQuads" Width="200" Height="300" Grid.Row ="1" Grid.Column="1"/>
         <Image x:Name="PieceImage" Width="64" Height="128" Grid.Row ="1" Grid.Column="2"/>
         <!--<Image x:Name="GrayImage" Width="400" Height="300" Grid.Row ="1" Grid.Column="1"/>
         <Image x:Name="CannyImage" Width="400" Height="300" Grid.Row ="1" Grid.Column="2"/>
         <Image x:Name="LinesImage" Width="400" Height="300" Grid.Row ="1" Grid.Column="3"/>-->
-        <Image x:Name="WarpedImage" Width="400" Height="300" Grid.Row ="2" Grid.Column="0"/>
-        <Image x:Name="WarpedCannyImage" Width="400" Height="300" Grid.Row ="2" Grid.Column="1"/>
-        <Image x:Name="WarpedLinesImage" Width="400" Height="300" Grid.Row ="2" Grid.Column="2"/>
-        <Image x:Name="GridBoxesImage" Width="400" Height="300" Grid.Row ="2" Grid.Column="3"/>
+        <Image x:Name="WarpedImage" Width="200" Height="300" Grid.Row ="2" Grid.Column="0"/>
+        <Image x:Name="WarpedCannyImage" Width="200" Height="300" Grid.Row ="2" Grid.Column="1"/>
+        <Image x:Name="WarpedLinesImage" Width="200" Height="300" Grid.Row ="2" Grid.Column="2"/>
+        <Image x:Name="GridBoxesImage" Width="200" Height="300" Grid.Row ="2" Grid.Column="3"/>
     </Grid>
 </Window>
