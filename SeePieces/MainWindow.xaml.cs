@@ -29,7 +29,7 @@ namespace SeePieces
         private void ButtonGo_Click(object sender, RoutedEventArgs e)
         {
             Engine.Piece.PieceDecider decider = new Engine.Piece.PieceDecider();
-            decider.PieceImagePath = System.IO.Path.GetFullPath(".\\..\\Images\\Pieces\\BPawn1.jpg");
+            decider.PieceImagePath = System.IO.Path.GetFullPath(".\\..\\Images\\Pieces\\wRook1.jpg");
             decider.Process();
 
             PieceImage.Source = BitmapSourceConvert.ToBitmapSource(decider.PieceImage);

@@ -12,6 +12,7 @@
             <ColumnDefinition Width="205"/>
             <ColumnDefinition Width="205"/>
             <ColumnDefinition Width="205"/>
+            <ColumnDefinition Width="205"/>
         </Grid.ColumnDefinitions>
         <Button Grid.Row ="0" Grid.Column="0" Name="ButtonGo" Click="ButtonGo_Click" />
         <Image x:Name="PieceImage" Width="200" Height="400" Grid.Row ="1" Grid.Column="0"/>
