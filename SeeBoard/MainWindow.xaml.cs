@@ -41,7 +41,7 @@ namespace SeeBoard
             sw.Start();
 
             m_Engine = new Engine.Engine();
-            m_Engine.BoardImagePath = System.IO.Path.GetFullPath(".\\..\\Images\\Boards\\Board1.jpg");
+            m_Engine.BoardImagePath = System.IO.Path.GetFullPath(".\\..\\Images\\MyBoards\\Board01.jpg");
             m_Engine.Process();
 
             sw.Stop();
@@ -103,7 +103,7 @@ namespace SeeBoard
 
         private void ButtonPrev_Click(object sender, RoutedEventArgs e)
         {
-            pieceX++;
+            pieceX--;
             if (pieceX == -1)
             {
                 pieceX = 0;
