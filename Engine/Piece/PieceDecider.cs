@@ -27,6 +27,16 @@ namespace Engine.Piece
             get;
             private set;
         }
+        public Image<Gray, Byte> HueImage
+        {
+            get;
+            private set;
+        }
+        public Image<Bgr, Byte> MaskedImage
+        {
+            get;
+            private set;
+        }
 
 
         public void Process()
@@ -36,16 +46,31 @@ namespace Engine.Piece
             // Convert the image to grayscale and filter out the noise
             GrayImage = PieceImage.Convert<Gray, Byte>().PyrDown().PyrUp();
 
-            // Do canny filter
-            CannyImage = GrayImage.Canny(170.0, 50.0);
+            HueImage = GrayImage.CopyBlank();
 
-            using (MemStorage stor = new MemStorage())
+            // Do hsv histogram
+            Image<Hsv, Byte> hsvImg = PieceImage.Convert<Hsv, Byte>();
+            Image<Gray, Byte>[] channels = hsvImg.Split();
+            channels[0] = channels[0].InRange(new Gray(10), new Gray(18));
+            channels[1] = channels[1].InRange(new Gray(100), new Gray(255));
+            channels[2] = channels[2].InRange(new Gray(20), new Gray(255));
+
+            HueImage = channels[1].And(channels[0]);
+
+            for (int i = 0; i < 4; i++)
             {
-                Contour<Point> contours = CannyImage.FindContours(
-                   Emgu.CV.CvEnum.CHAIN_APPROX_METHOD.CV_CHAIN_APPROX_SIMPLE,
-                   Emgu.CV.CvEnum.RETR_TYPE.CV_RETR_TREE,
-                   stor);
+               HueImage = HueImage.Erode(1);
+               HueImage = HueImage.Dilate(1);
             }
+
+            //HueImage = HueImage.SmoothBlur(5, 5);
+
+
+            // Masked image
+            MaskedImage = PieceImage.Xor(new Bgr(0, 0, 0), HueImage);
+
+            // Do canny filter
+            CannyImage = MaskedImage.Canny(170.0, 50.0);
         }
 
     }

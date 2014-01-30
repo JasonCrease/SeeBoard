@@ -35,6 +35,8 @@ namespace SeePieces
             PieceImage.Source = BitmapSourceConvert.ToBitmapSource(decider.PieceImage);
             GrayImage.Source = BitmapSourceConvert.ToBitmapSource(decider.GrayImage);
             CannyImage.Source = BitmapSourceConvert.ToBitmapSource(decider.CannyImage);
+            HueImage.Source = BitmapSourceConvert.ToBitmapSource(decider.HueImage);
+            MaskedImage.Source = BitmapSourceConvert.ToBitmapSource(decider.MaskedImage);
         }
 
         public static class BitmapSourceConvert

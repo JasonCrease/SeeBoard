@@ -1,7 +1,7 @@
 ﻿<Window x:Class="SeePieces.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="MainWindow" Height="472" Width="788">
+        Title="MainWindow" Height="472" Width="1100">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="20" />
@@ -13,10 +13,13 @@
             <ColumnDefinition Width="205"/>
             <ColumnDefinition Width="205"/>
             <ColumnDefinition Width="205"/>
+            <ColumnDefinition Width="205"/>
         </Grid.ColumnDefinitions>
         <Button Grid.Row ="0" Grid.Column="0" Name="ButtonGo" Click="ButtonGo_Click" />
         <Image x:Name="PieceImage" Width="200" Height="400" Grid.Row ="1" Grid.Column="0"/>
         <Image x:Name="GrayImage" Width="200" Height="400" Grid.Row ="1" Grid.Column="1"/>
         <Image x:Name="CannyImage" Width="200" Height="400" Grid.Row ="1" Grid.Column="2"/>
+        <Image x:Name="HueImage" Width="200" Height="400" Grid.Row ="1" Grid.Column="3"/>
+        <Image x:Name="MaskedImage" Width="200" Height="400" Grid.Row ="1" Grid.Column="4"/>
     </Grid>
 </Window>
