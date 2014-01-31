@@ -53,14 +53,21 @@ namespace Engine.Piece
             Image<Gray, Byte>[] channels = hsvImg.Split();
             channels[0] = channels[0].InRange(new Gray(10), new Gray(18));
             channels[1] = channels[1].InRange(new Gray(100), new Gray(255));
-            channels[2] = channels[2].InRange(new Gray(20), new Gray(255));
+            channels[2] = channels[2].InRange(new Gray(0), new Gray(200));
 
-            HueImage = channels[1].And(channels[0]);
+            //CvInvoke.cvReshape(hsvImg, output,);
 
-            for (int i = 0; i < 4; i++)
+            //CvInvoke.cvKMeans2()
+
+
+
+
+            HueImage = channels[1].And(channels[0]).And(channels[2]);
+
+            for (int i = 0; i < 0; i++)
             {
-               HueImage = HueImage.Erode(1);
-               HueImage = HueImage.Dilate(1);
+                HueImage = HueImage.Erode(1);
+                HueImage = HueImage.Dilate(1);
             }
 
             //HueImage = HueImage.SmoothBlur(5, 5);
@@ -68,6 +75,8 @@ namespace Engine.Piece
 
             // Masked image
             MaskedImage = PieceImage.Xor(new Bgr(0, 0, 0), HueImage);
+
+            MaskedImage = new Image<Bgr, byte>(new Image<Gray, byte>[] { channels[0], channels[1], channels[2] });
 
             // Do canny filter
             CannyImage = MaskedImage.Canny(170.0, 50.0);
