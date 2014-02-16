@@ -60,6 +60,49 @@ namespace Engine.Piece
             //CvInvoke.cvKMeans2()
 
 
+            // Do k-means clustering
+
+            Matrix<float> samples = new Matrix<float>(hsvImg.Rows * hsvImg.Cols, 1, 3);
+            Matrix<int> finalClusters = new Matrix<int>(hsvImg.Rows * hsvImg.Cols, 1);
+
+            for (int y = 0; y < hsvImg.Rows; y++)
+            {
+                for (int x = 0; x < hsvImg.Cols; x++)
+                {
+                    samples.Data[y + x * hsvImg.Rows, 0] = (float)hsvImg[y, x].Hue;
+                    samples.Data[y + x * hsvImg.Rows, 1] = (float)hsvImg[y, x].Satuation;
+                    samples.Data[y + x * hsvImg.Rows, 2] = (float)hsvImg[y, x].Value;
+                }
+            }
+
+            MCvTermCriteria term = new MCvTermCriteria(100, 0.5);
+            term.type = Emgu.CV.CvEnum.TERMCRIT.CV_TERMCRIT_ITER | Emgu.CV.CvEnum.TERMCRIT.CV_TERMCRIT_EPS;
+
+            int clusterCount = 3;
+            int attempts = 4;
+            Matrix<Single> centers = new Matrix<Single>(clusterCount, hsvImg.Rows * hsvImg.Cols);
+            CvInvoke.cvKMeans2(samples, clusterCount, finalClusters, term, attempts, IntPtr.Zero, Emgu.CV.CvEnum.KMeansInitType.PPCenters, IntPtr.Zero, IntPtr.Zero);
+
+            MaskedImage = new Image<Bgr, byte>(hsvImg.Size);
+            Bgr[] clusterColors = new Bgr[4];
+            clusterColors[0] = new Bgr(100, 0, 200);
+            clusterColors[1] = new Bgr(200, 0, 200);
+            clusterColors[2] = new Bgr(100, 200, 0);
+            clusterColors[3] = new Bgr(200, 50, 50);
+
+            for (int y = 0; y < hsvImg.Rows; y++)
+            {
+                for (int x = 0; x < hsvImg.Cols; x++)
+                {
+                    //if (finalClusters[y + x * hsvImg.Rows, 0] == 0)
+                    //{
+                        PointF p = new PointF(x, y);
+                        Bgr c = clusterColors[finalClusters[y + x * hsvImg.Rows, 0]];
+                        //MaskedImage.Data[y, x, 1] = 200; // 
+                        MaskedImage.Draw(new CircleF(p, 0.4f), c, 1);
+                    //}
+                }
+            }
 
 
             HueImage = channels[1].And(channels[0]).And(channels[2]);
@@ -74,9 +117,9 @@ namespace Engine.Piece
 
 
             // Masked image
-            MaskedImage = PieceImage.Xor(new Bgr(0, 0, 0), HueImage);
+            //MaskedImage = PieceImage.Xor(new Bgr(0, 0, 0), HueImage);
 
-            MaskedImage = new Image<Bgr, byte>(new Image<Gray, byte>[] { channels[0], channels[1], channels[2] });
+            //MaskedImage = new Image<Bgr, byte>(new Image<Gray, byte>[] { channels[0], channels[1], channels[2] });
 
             // Do canny filter
             CannyImage = MaskedImage.Canny(170.0, 50.0);
